@@ -3,17 +3,9 @@ package main
 import (
 	"bufio"
 	"os"
+	"strconv"
 	"unicode"
 )
-
-type GamePair struct{
-	gamePower int;
-	isValid bool;
-}
-
-type GameConfig struct{
-	blue, red, green int;
-}
 
 func main() {
 	input_file_name := "input.txt"
@@ -28,87 +20,101 @@ func main() {
 	file_scanner := bufio.NewScanner(read_file)
 	file_scanner.Split(bufio.ScanLines)
 
-	total_goroutines := 0
-
-	return_channel := make(chan GamePair, 100) 
+	var text []string
 
 	for file_scanner.Scan() {
-		total_goroutines += 1
-		go scan_line(file_scanner.Text(), return_channel)
+		text = append(text, file_scanner.Text())
 	}
-	
-	finished_routines := 0
 
 	final_value := 0
 
-	for finished_routines < total_goroutines {
-		temp_ret := <- return_channel
-		if temp_ret.isValid {
-			final_value += temp_ret.gamePower
+	for line_num, line := range(text) {
+		for column, potential_num := range(line) {
+			// Search for *
+			if potential_num == '*' {
+				// 1 and 2 gear
+				gear1 := ""
+				gear2 := ""
+				// Check all surrounding spots
+				// Line above
+				if line_num > 0 {
+					// left up
+					if column > 0 && unicode.IsDigit(rune(text[line_num-1][column-1])) {
+						gear1, gear2 = UpdateGears(gear1, gear2, line_num-1, column - 1, text)
+					}
+					// middle up
+					if unicode.IsDigit(rune(text[line_num-1][column])) {
+						gear1, gear2 = UpdateGears(gear1, gear2, line_num-1, column, text)
+
+					}
+					// right up
+					if column < len(text[line_num - 1]) - 1 && unicode.IsDigit(rune(text[line_num-1][column+1])) {
+						gear1, gear2 = UpdateGears(gear1, gear2, line_num-1, column + 1, text)
+					}
+				}
+				// line below
+				if line_num < len(text) - 1{
+					// left below
+					if column > 0 && unicode.IsDigit(rune(text[line_num+1][column-1])) {
+						gear1, gear2 = UpdateGears(gear1, gear2, line_num + 1, column - 1, text)
+					}
+					// middle below
+					if unicode.IsDigit(rune(text[line_num+1][column])) {
+						gear1, gear2 = UpdateGears(gear1, gear2, line_num + 1, column, text)
+
+					}
+					// right below
+					if column < len(text[line_num + 1]) - 1 && unicode.IsDigit(rune(text[line_num+1][column+1])) {
+						gear1, gear2 = UpdateGears(gear1, gear2, line_num + 1, column + 1, text)
+					}
+				}
+				// left
+				if column > 0 && unicode.IsDigit(rune(text[line_num][column-1])) {
+					gear1, gear2 = UpdateGears(gear1, gear2, line_num, column - 1, text)
+				}
+				// right
+				if column < len(text[line_num]) - 1 && unicode.IsDigit(rune(text[line_num][column + 1])) {
+					gear1, gear2 = UpdateGears(gear1, gear2, line_num, column + 1, text)
+				}
+				if gear1 != "" && gear2 != "" {
+					gear1_int, err := strconv.Atoi(gear1)
+					if err != nil {
+						panic(err)
+					}
+					gear2_int, err := strconv.Atoi(gear2)
+					if err != nil {
+						panic(err)
+					}
+					final_value += gear1_int * gear2_int
+				}
+			}
 		}
-		finished_routines += 1
-		// println("Return value: ", temp_ret.gamePower, temp_ret.isValid)
 	}
+
 	println("Final Sum: ", final_value)
 }
 
-func scan_line(curline string, returnchan chan<- GamePair) {
-	gameMins := GameConfig{}
-	for curline[0] != ':' {
-		curline = curline[1:]
+func UpdateGears(gear1, gear2 string, row, col int, text []string) (string, string) {
+	temp_gear := string(text[row][col])
+	temp_col := col
+	for temp_col > 0 && unicode.IsDigit(rune(text[row][temp_col-1])) {
+		temp_col -= 1
+		temp_gear = string(text[row][temp_col]) + temp_gear
 	}
-	curline = curline [2:]
-	for len(curline) > 0 {
-		tempVal := 0
-		for unicode.IsDigit(rune(curline[0])) {
-			if tempVal > 0 {
-				tempVal *= 10
-			}
-			tempVal += int(curline[0] - '0')
-			curline = curline[1:]
-		}
-		curline = curline[1:]
-		switch parse_color(curline) {
-		case "red": 
-			curline = curline[3:]
-			if tempVal > gameMins.red {
-				gameMins.red = tempVal
-			}
-		case "blue":
-			curline = curline[4:]
-			if tempVal > gameMins.blue {
-				gameMins.blue = tempVal
-			}
-		case "green":
-			curline = curline[5:]
-			if tempVal > gameMins.green {
-				gameMins.green = tempVal
-			}
-		}
-		if len(curline) > 2 {
-			curline = curline[2:]
-		}
+	temp_col = col
+	for temp_col < len(text[row]) - 1 && unicode.IsDigit(rune(text[row][temp_col+1])) {
+		temp_col += 1
+		temp_gear += string(text[row][temp_col])
 	}
-	returnchan <- GamePair{gamePower: gameMins.blue * gameMins.green * gameMins.red, isValid: true}
+	if gear1 == "" {
+		return temp_gear, gear2
+	}
+	if temp_gear != gear1 && temp_gear != gear2 {
+		return gear1, temp_gear
+	}
+	return gear1, gear2
 }
 
-func parse_color(curline string) string {
-	// print("In parse color:", curline, "\n")
-	if len(curline) >= 3 {
-		if curline[:3] == "red" {
-			return "red"
-		}
-	}
-	if len(curline) >= 4 {
-		if curline[:4] == "blue" {
-			return "blue"
-		}
-	}
-	if len(curline) >= 5 {
-		if curline[:5] == "green" {
-			return "green"
-		}
-	}
-	println("Failure:", curline[:3], curline[:4], curline[:5])
-	panic("PARSE COLOR FAILED")
+func RuneToInt(character rune) int {
+	return int(character - '0')
 }
