@@ -53,13 +53,15 @@ func main() {
 
 	for i := 0; i < total_goroutines; i++ {
 		total_scratchcards += card_copies[i]
-		println(total_scratchcards)
-		for j := 1; j+i < total_goroutines && j <= card_copies[i]; j++ {
-			card_copies[i+j] += 1
+		// println(total_scratchcards)
+		// fmt.Printf("%v\n", card_copies)
+		for j := 1; j+i < total_goroutines && j <= return_values[i]; j++ {
+			card_copies[i+j] += 1 * card_copies[i]
 		}
+		// fmt.Printf("%v\n", card_copies)
 	}
 
-	println("Final Sum: ", total_scratchcards-1)
+	println("Final Sum: ", total_scratchcards)
 }
 
 func scan_line(curline string, gameid int, returnchan chan<- Pair) {
