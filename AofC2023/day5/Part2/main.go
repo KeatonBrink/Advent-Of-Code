@@ -15,8 +15,8 @@ type Pair struct {
 }
 
 func main() {
-	// input_file_name := "input.txt"
-	input_file_name := "test_input.txt"
+	input_file_name := "input.txt"
+	// input_file_name := "test_input.txt"
 
 	read_file, err := os.Open(input_file_name)
 	if err != nil {
@@ -85,28 +85,46 @@ func main() {
 	closest_location := int(math.Pow(2, 60))
 	// println("Closest", closest_location)
 
+	return_chan := make(chan int, len(seeds)/2)
 	// Loop through all the seeds
 	for i := 0; i < len(seeds); i += 2 {
-		for seed := seeds[i]; seed < seeds[i]+seeds[i+1]; seed++ {
-			// Loop through the tranformer, until the end
-			current_source_value := seed
-			// println("\n\n\n\nSeed", seed)
-			for _, transformer_key := range all_categories {
-				// println("Transformer", transformer_key)
-				current_transformer := transformers[transformer_key]
-				for key, value := range current_transformer {
-					if current_source_value >= key && current_source_value < key+value.SD_Range {
-						current_source_value = value.Destination + (current_source_value - key)
-						break
-					}
-				}
-				// println("Current_soure_value", current_source_value)
-			}
-			if current_source_value < closest_location {
-				closest_location = current_source_value
-			}
+		go GRSeedCheck(i, seeds, transformers, all_categories, closest_location, return_chan)
+	}
+
+	for i := 0; i < len(seeds); i += 2 {
+		temp_loc := <-return_chan
+		println("Got new location", temp_loc)
+		if temp_loc < closest_location {
+			closest_location = temp_loc
+			println("New closest location", temp_loc)
 		}
 	}
 
-	print("Closest Location Found:", closest_location)
+	println("Closest Location Found:", closest_location)
+}
+
+func GRSeedCheck(i int, seeds []int, transformers map[string]map[int]Pair, all_categories []string, closest_location int, return_chan chan int) {
+	for seed := seeds[i]; seed < seeds[i]+seeds[i+1]; seed++ {
+		if seed == int(seeds[i]+seeds[i+1]/2) {
+			println("Halfway there lol", seed)
+		}
+		// Loop through the tranformer, until the end
+		current_source_value := seed
+		// println("\n\n\n\nSeed", seed)
+		for _, transformer_key := range all_categories {
+			// println("Transformer", transformer_key)
+			current_transformer := transformers[transformer_key]
+			for key, value := range current_transformer {
+				if current_source_value >= key && current_source_value < key+value.SD_Range {
+					current_source_value = value.Destination + (current_source_value - key)
+					break
+				}
+			}
+			// println("Current_soure_value", current_source_value)
+		}
+		if current_source_value < closest_location {
+			closest_location = current_source_value
+		}
+	}
+	return_chan <- closest_location
 }
