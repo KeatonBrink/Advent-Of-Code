@@ -42,6 +42,22 @@ func main() {
 	}
 	text = text[2:]
 
+	var repeated_seeds []int
+
+	for i := 0; i < len(seeds); i += 2 {
+		for j := seeds[i]; j < seeds[i]+seeds[i+1]; j++ {
+			repeated_seeds = append(repeated_seeds, j)
+		}
+	}
+
+	seeds = repeated_seeds
+
+	// print(seeds)
+
+	for _, seed := range seeds {
+		println(seed)
+	}
+
 	// first := true
 
 	transformers := make(map[string]map[int]Pair)
@@ -53,7 +69,7 @@ func main() {
 	// var next_category string
 
 	for _, line := range text {
-		println("Line:", line)
+		// println("Line:", line)
 		if len(line) < 1 {
 			continue
 		}
@@ -83,15 +99,15 @@ func main() {
 	}
 
 	closest_location := int(math.Pow(2, 60))
-	println("Closest", closest_location)
+	// println("Closest", closest_location)
 
 	// Loop through all the seeds
 	for _, seed := range seeds {
 		// Loop through the tranformer, until the end
 		current_source_value := seed
-		println("\n\n\n\nSeed", seed)
+		// println("\n\n\n\nSeed", seed)
 		for _, transformer_key := range all_categories {
-			println("Transformer", transformer_key)
+			// println("Transformer", transformer_key)
 			current_transformer := transformers[transformer_key]
 			for key, value := range current_transformer {
 				if current_source_value >= key && current_source_value < key+value.SD_Range {
@@ -99,7 +115,7 @@ func main() {
 					break
 				}
 			}
-			println("Current_soure_value", current_source_value)
+			// println("Current_soure_value", current_source_value)
 		}
 		if current_source_value < closest_location {
 			closest_location = current_source_value
