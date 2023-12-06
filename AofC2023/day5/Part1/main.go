@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -43,7 +44,7 @@ func main() {
 
 	// first := true
 
-	var transformers map[string]map[int]Pair
+	transformers := make(map[string]map[int]Pair)
 
 	var all_categories []string
 
@@ -52,6 +53,10 @@ func main() {
 	// var next_category string
 
 	for _, line := range text {
+		println("Line:", line)
+		if len(line) < 1 {
+			continue
+		}
 		if unicode.IsLetter(rune(line[0])) {
 			split_string := strings.Split(line, "-")
 			current_category = split_string[0]
@@ -66,7 +71,7 @@ func main() {
 			// all_categories = append(all_categories, next_category)
 		} else if unicode.IsDigit(rune(line[0])) {
 			var source, destination, sd_range int
-			found, err := fmt.Sscanf(line, "%d %d %d", &source, &destination, &sd_range)
+			found, err := fmt.Sscanf(line, "%d %d %d", &destination, &source, &sd_range)
 			if err != nil {
 				panic(err)
 			}
@@ -77,9 +82,29 @@ func main() {
 		}
 	}
 
-	// closest_location :=
+	closest_location := int(math.Pow(2, 60))
+	println("Closest", closest_location)
 
 	// Loop through all the seeds
-	// Loop through the tranformer, until the end
-	// If the "location" is the lowest seen so far, save it
+	for _, seed := range seeds {
+		// Loop through the tranformer, until the end
+		current_source_value := seed
+		println("\n\n\n\nSeed", seed)
+		for _, transformer_key := range all_categories {
+			println("Transformer", transformer_key)
+			current_transformer := transformers[transformer_key]
+			for key, value := range current_transformer {
+				if current_source_value >= key && current_source_value < key+value.SD_Range {
+					current_source_value = value.Destination + (current_source_value - key)
+					break
+				}
+			}
+			println("Current_soure_value", current_source_value)
+		}
+		if current_source_value < closest_location {
+			closest_location = current_source_value
+		}
+	}
+
+	print("Closest Location Found:", closest_location)
 }
