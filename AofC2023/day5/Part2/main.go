@@ -15,8 +15,8 @@ type Pair struct {
 }
 
 func main() {
-	input_file_name := "input.txt"
-	// input_file_name := "test_input.txt"
+	// input_file_name := "input.txt"
+	input_file_name := "test_input.txt"
 
 	read_file, err := os.Open(input_file_name)
 	if err != nil {
@@ -41,22 +41,6 @@ func main() {
 		seeds = append(seeds, seed1)
 	}
 	text = text[2:]
-
-	var repeated_seeds []int
-
-	for i := 0; i < len(seeds); i += 2 {
-		for j := seeds[i]; j < seeds[i]+seeds[i+1]; j++ {
-			repeated_seeds = append(repeated_seeds, j)
-		}
-	}
-
-	seeds = repeated_seeds
-
-	// print(seeds)
-
-	for _, seed := range seeds {
-		println(seed)
-	}
 
 	// first := true
 
@@ -102,23 +86,25 @@ func main() {
 	// println("Closest", closest_location)
 
 	// Loop through all the seeds
-	for _, seed := range seeds {
-		// Loop through the tranformer, until the end
-		current_source_value := seed
-		// println("\n\n\n\nSeed", seed)
-		for _, transformer_key := range all_categories {
-			// println("Transformer", transformer_key)
-			current_transformer := transformers[transformer_key]
-			for key, value := range current_transformer {
-				if current_source_value >= key && current_source_value < key+value.SD_Range {
-					current_source_value = value.Destination + (current_source_value - key)
-					break
+	for i := 0; i < len(seeds); i += 2 {
+		for seed := seeds[i]; seed < seeds[i]+seeds[i+1]; seed++ {
+			// Loop through the tranformer, until the end
+			current_source_value := seed
+			// println("\n\n\n\nSeed", seed)
+			for _, transformer_key := range all_categories {
+				// println("Transformer", transformer_key)
+				current_transformer := transformers[transformer_key]
+				for key, value := range current_transformer {
+					if current_source_value >= key && current_source_value < key+value.SD_Range {
+						current_source_value = value.Destination + (current_source_value - key)
+						break
+					}
 				}
+				// println("Current_soure_value", current_source_value)
 			}
-			// println("Current_soure_value", current_source_value)
-		}
-		if current_source_value < closest_location {
-			closest_location = current_source_value
+			if current_source_value < closest_location {
+				closest_location = current_source_value
+			}
 		}
 	}
 
