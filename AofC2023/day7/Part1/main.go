@@ -51,6 +51,8 @@ func main() {
 
 	grouped_by_win_type := make([][]Pair, 7)
 
+	return_val := 0
+
 	for _, line := range text {
 		var cards_from_line string
 		var bid_from_line int
@@ -62,6 +64,28 @@ func main() {
 			panic("Not enough found in scan")
 		}
 		grouped_by_win_type[FindWinType(cards_from_line)] = append(grouped_by_win_type[FindWinType(cards_from_line)], Pair{card: cards_from_line, bid: bid_from_line})
+		// fmt.Printf("%s added to group: %d \n", cards_from_line, FindWinType(cards_from_line))
+	}
+
+	card_count := 1
+	for win_type, slice_of_win_type := range grouped_by_win_type {
+		for current_card_index := 0; current_card_index < len(grouped_by_win_type[win_type])-1; current_card_index++ {
+			for potential_switch_card_index := current_card_index + 1; potential_switch_card_index < len(grouped_by_win_type[win_type]); potential_switch_card_index++ {
+				if IsLeftHandBetterThanRight(slice_of_win_type[current_card_index].card, slice_of_win_type[potential_switch_card_index].card) {
+					slice_of_win_type[potential_switch_card_index], slice_of_win_type[current_card_index] = slice_of_win_type[current_card_index], slice_of_win_type[potential_switch_card_index]
+				}
+			}
+			return_val += card_count * slice_of_win_type[current_card_index].bid
+			// fmt.Printf("Cards %s rank %d with bid %d, new ret_val %d\n", slice_of_win_type[current_card_index].card, card_count, slice_of_win_type[current_card_index].bid, return_val)
+			card_count++
+		}
+		// Getting the last element
+		i := len(slice_of_win_type) - 1
+		if i >= 0 {
+			return_val += card_count * slice_of_win_type[i].bid
+			// fmt.Printf("Cards %s rank %d with bid %d, new ret_val %d\n", slice_of_win_type[i].card, card_count, slice_of_win_type[i].bid, return_val)
+			card_count++
+		}
 	}
 
 	println("Valid attempts", return_val)
@@ -82,6 +106,19 @@ func FindWinType(cards string) int {
 		return 1
 	}
 	return 0
+}
+
+func IsLeftHandBetterThanRight(left string, right string) bool {
+	for char_index := range left {
+		if CharToInt(left[char_index]) > CharToInt(right[char_index]) {
+			// fmt.Printf("Left hand is better: left %s right %s \n", left, right)
+			return true
+		} else if CharToInt(left[char_index]) < CharToInt(right[char_index]) {
+			// fmt.Printf("Right hand is better: left %s right %s \n", left, right)
+			return false
+		}
+	}
+	panic("I think all hands should be unique?")
 }
 
 func CharToInt(card byte) int {
