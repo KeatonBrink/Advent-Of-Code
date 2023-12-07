@@ -102,6 +102,11 @@ func IsLeftHandBetterThanRight(left string, right string) bool {
 			return false
 		}
 	}
+	println(string(left[3]))
+	println(CharToInt(left[3]))
+	println(string(right[3]))
+	println(CharToInt(right[3]))
+	fmt.Printf("Hand left %s, Hand right %s \n", left, right)
 	panic("I think all hands should be unique?")
 }
 
@@ -110,7 +115,7 @@ func CharToInt(card byte) int {
 	case card >= '2' && card <= '9':
 		return int(card - '1')
 	case card == 'T':
-		return 8
+		return 9
 	case card == 'J':
 		return 0
 	case card == 'Q':
@@ -125,7 +130,18 @@ func CharToInt(card byte) int {
 }
 
 func IsFiveOfKind(cards string) bool {
-	return cards[0] == cards[1] && cards[1] == cards[2] && cards[2] == cards[3] && cards[3] == cards[4]
+	kind := 'a'
+	for _, char := range cards {
+		if char == 'J' {
+			continue
+		}
+		if kind == 'a' {
+			kind = char
+		} else if kind != char {
+			return false
+		}
+	}
+	return true
 }
 
 func IsFourOfKind(cards string) bool {
@@ -133,11 +149,19 @@ func IsFourOfKind(cards string) bool {
 	for _, char := range cards {
 		integer_card := CharToInt(byte(char))
 		potential_cards[integer_card] += 1
-		if potential_cards[integer_card] >= 4 {
+	}
+
+	for i := 1; i < len(potential_cards); i++ {
+		if potential_cards[i]+potential_cards[0] >= 4 {
 			return true
 		}
 	}
 	return false
+}
+
+type HighCard struct {
+	Card  int
+	Count int
 }
 
 func IsFullHouse(cards string) bool {
@@ -146,16 +170,26 @@ func IsFullHouse(cards string) bool {
 		integer_card := CharToInt(byte(char))
 		potential_cards[integer_card] += 1
 	}
-	is_triple := false
-	is_double := false
-	for _, card_int := range potential_cards {
-		if card_int == 3 {
-			is_triple = true
-		} else if card_int == 2 {
-			is_double = true
+	first := HighCard{Card: -1, Count: -1}
+	second := HighCard{Card: -1, Count: -1}
+	for current_card_as_int, current_card_count := range potential_cards {
+		if current_card_as_int == 0 {
+			continue
+		}
+		if first.Count < current_card_count {
+			second.Count = first.Count
+			second.Card = first.Count
+			first.Count = current_card_count
+			first.Card = current_card_as_int
+		} else if second.Count < current_card_count {
+			second.Count = current_card_count
+			second.Card = current_card_as_int
 		}
 	}
-	return is_double && is_triple
+	if first.Count+second.Count+potential_cards[0] == 5 {
+		return true
+	}
+	return false
 }
 
 func IsThreeOfKind(cards string) bool {
@@ -163,7 +197,10 @@ func IsThreeOfKind(cards string) bool {
 	for _, char := range cards {
 		integer_card := CharToInt(byte(char))
 		potential_cards[integer_card] += 1
-		if potential_cards[integer_card] >= 3 {
+	}
+
+	for i := 1; i < len(potential_cards); i++ {
+		if potential_cards[i]+potential_cards[0] == 3 {
 			return true
 		}
 	}
@@ -176,15 +213,24 @@ func IsTwoPair(cards string) bool {
 		integer_card := CharToInt(byte(char))
 		potential_cards[integer_card] += 1
 	}
-	is_double := false
-	for _, card_int := range potential_cards {
-		if card_int == 2 {
-			if !is_double {
-				is_double = true
-			} else {
-				return true
-			}
+	first := HighCard{Card: -1, Count: -1}
+	second := HighCard{Card: -1, Count: -1}
+	for current_card_as_int, current_card_count := range potential_cards {
+		if current_card_as_int == 0 {
+			continue
 		}
+		if first.Count < current_card_count {
+			second.Count = first.Count
+			second.Card = first.Count
+			first.Count = current_card_count
+			first.Card = current_card_as_int
+		} else if second.Count < current_card_count {
+			second.Count = current_card_count
+			second.Card = current_card_as_int
+		}
+	}
+	if first.Count+second.Count+potential_cards[0] == 4 {
+		return true
 	}
 	return false
 }
@@ -195,8 +241,11 @@ func IsOnePair(cards string) bool {
 		integer_card := CharToInt(byte(char))
 		potential_cards[integer_card] += 1
 	}
-	for _, card_int := range potential_cards {
-		if card_int == 2 {
+	for i, card_int := range potential_cards {
+		if i == 0 {
+			continue
+		}
+		if card_int+potential_cards[0] == 2 {
 			return true
 		}
 	}
