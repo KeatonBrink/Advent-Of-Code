@@ -60,37 +60,46 @@ func main() {
 
 	fmt.Printf("Total locations: %d\n", len(current_locations))
 
-	turns_made := 0
+	var turns_made_by_location []int = make([]int, len(current_locations))
 
-	for directions_index := 0; !AreAllNodesAtZ(current_locations); directions_index++ {
-		if directions_index == len(directions) {
-			directions_index = 0
-		}
-		cur_dir := directions[directions_index]
-		for cur_loc_ind := range current_locations {
-			direction_struct := network[current_locations[cur_loc_ind]]
+	for i, cur_loc := range current_locations {
+		turns_made := 0
+		for directions_index := 0; cur_loc[2] != 'Z'; directions_index++ {
+			if directions_index == len(directions) {
+				directions_index = 0
+			}
+			cur_dir := directions[directions_index]
+			direction_struct := network[cur_loc]
 			if cur_dir == 'R' {
-				current_locations[cur_loc_ind] = direction_struct.Right
+				cur_loc = direction_struct.Right
 			} else if cur_dir == 'L' {
-				current_locations[cur_loc_ind] = direction_struct.Left
+				cur_loc = direction_struct.Left
 			} else {
 				panic("Invalid direction")
 			}
+			turns_made++
 		}
-		turns_made++
-		if turns_made%100000000 == 0 {
-			println(turns_made)
-		}
+		turns_made_by_location[i] = turns_made
 	}
 
-	println("Turns Made", turns_made)
+	println("Turns Made", LCM(turns_made_by_location...))
 }
 
-func AreAllNodesAtZ(current_locations []string) bool {
-	for _, cur_loc := range current_locations {
-		if cur_loc[2] != 'Z' {
-			return false
-		}
+// greatest common divisor (GCD) via Euclidean algorithm
+func GCD(a, b int) int {
+	for a%b != 0 {
+		t := b
+		b = a % b
+		a = t
 	}
-	return true
+	return b
+}
+
+// find Least Common Multiple (LCM) via GCD
+func LCM(integers ...int) int {
+	lcm := 1
+	for i := 0; i < len(integers); i++ {
+		lcm = (lcm * integers[i]) / GCD(lcm, integers[i])
+	}
+	return lcm
 }
