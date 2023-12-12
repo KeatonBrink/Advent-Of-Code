@@ -59,3 +59,41 @@ func main() {
 	}
 	fmt.Printf("Final arrangement count: %d", possible_count)
 }
+
+func Recursive_Row(parts_row []byte, valid_config_row []int) int {
+	if len(row_parts) == 0 || len(valid_config_row) == 0 {
+		return 0
+	}
+	count := 0
+
+	var cur_parts_row []byte
+
+	copy(cur_parts_row, parts_row[part_ind:])
+
+	for part_ind := 0; part_ind < len(cur_parts_row); part_ind++ {
+		if len(cur_parts_row) < valid_config_row[0] {
+			break
+		}
+		is_valid_config := true
+		// Cycle through 
+		for temp_part_ind := part_ind; temp_part_ind < part_ind + valid_config_row[0]; temp_part_ind++ {
+			if row_parts[temp_part_ind] == '.' {
+				is_valid_config = false
+				break
+			}
+		}
+		if !is_valid_config {
+			continue
+		}
+		r_parts_row := cur_parts_row[part_ind + valid_config_row[0]:]
+		if len(r_parts_row) == 1 && r_parts_row[0] == '#' {
+			continue
+		}
+
+		r_valid_config_row := valid_config_row[1:]
+
+
+	}
+
+	return count
+}
