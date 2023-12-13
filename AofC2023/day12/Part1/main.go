@@ -13,8 +13,8 @@ type Coordinate struct {
 }
 
 func main() {
-	// input_file_name := "input.txt"
-	input_file_name := "test_input.txt"
+	input_file_name := "input.txt"
+	// input_file_name := "test_input.txt"
 
 	read_file, err := os.Open(input_file_name)
 	if err != nil {
@@ -83,62 +83,66 @@ func Recursive_Row(parts_row []byte, valid_config_row []int) int {
 
 	count := 0
 
-	for part_ind := 0; part_ind < len(parts_row); part_ind++ {
-		//println("In for loop")
-		if len(parts_row[part_ind:]) < valid_config_row[0] {
-			//fmt.Printf("Curpart len %d, config val %d\n", len(parts_row), valid_config_row[0])
-			break
-		}
-		//fmt.Printf("%d %s %d\n", len(parts_row), string(parts_row), valid_config_row[0])
-		is_valid_config := true
-		// Cycle through
-		for temp_part_ind := part_ind; temp_part_ind < part_ind+valid_config_row[0]; temp_part_ind++ {
-			if parts_row[temp_part_ind] == '.' {
-				//println("Is not valid config")
-				is_valid_config = false
-				break
-			}
-		}
-		//println("Finish cycle")
-		if !is_valid_config {
-			//println("Is not valid config")
-			continue
-		}
-		r_parts_row := parts_row[part_ind+valid_config_row[0]:]
-		if len(r_parts_row) > 0 {
-			if r_parts_row[0] == '#' {
-				//println("Found #")
-				continue
-			} else {
-				r_parts_row = r_parts_row[1:]
-			}
-		}
-
-		r_valid_config_row := valid_config_row[1:]
-
-		count += Recursive_Row(r_parts_row, r_valid_config_row)
-
-		if parts_row[part_ind] == '#' {
-			break
-		}
-	}
-
-	// if parts_row[0] == '.' || parts_row[0] == '?' {
-	// 	count += Recursive_Row(parts_row[1:], valid_config_row)
-	// }
-
-	// if parts_row[0] == '#' || parts_row[0] == '?' {
-	// 	does_not_contain_dot := true
-	// 	for i := 0; i < valid_config_row[0]; i++ {
-	// 		if parts_row[i] == '.' {
-	// 			does_not_contain_dot = false
+	// for part_ind := 0; part_ind < len(parts_row); part_ind++ {
+	// 	//println("In for loop")
+	// 	if len(parts_row[part_ind:]) < valid_config_row[0] {
+	// 		//fmt.Printf("Curpart len %d, config val %d\n", len(parts_row), valid_config_row[0])
+	// 		break
+	// 	}
+	// 	//fmt.Printf("%d %s %d\n", len(parts_row), string(parts_row), valid_config_row[0])
+	// 	is_valid_config := true
+	// 	// Cycle through
+	// 	for temp_part_ind := part_ind; temp_part_ind < part_ind+valid_config_row[0]; temp_part_ind++ {
+	// 		if parts_row[temp_part_ind] == '.' {
+	// 			//println("Is not valid config")
+	// 			is_valid_config = false
+	// 			break
 	// 		}
 	// 	}
-	// 	if valid_config_row[0] <= len(parts_row) && does_not_contain_dot && (valid_config_row[0] == len(parts_row) || parts_row[valid_config_row[0]] != '#') {
+	// 	//println("Finish cycle")
+	// 	if !is_valid_config {
+	// 		//println("Is not valid config")
+	// 		continue
+	// 	}
+	// 	r_parts_row := parts_row[part_ind+valid_config_row[0]:]
+	// 	if len(r_parts_row) > 0 {
+	// 		if r_parts_row[0] == '#' {
+	// 			//println("Found #")
+	// 			continue
+	// 		} else {
+	// 			r_parts_row = r_parts_row[1:]
+	// 		}
+	// 	}
 
-	// 		count += Recursive_Row(parts_row[valid_config_row[0]+1:], valid_config_row[1:])
+	// 	r_valid_config_row := valid_config_row[1:]
+
+	// 	count += Recursive_Row(r_parts_row, r_valid_config_row)
+
+	// 	if parts_row[part_ind] == '#' {
+	// 		break
 	// 	}
 	// }
+
+	if parts_row[0] == '.' || parts_row[0] == '?' {
+		count += Recursive_Row(parts_row[1:], valid_config_row)
+	}
+
+	if parts_row[0] == '#' || parts_row[0] == '?' {
+		does_not_contain_dot := true
+		for i := 0; i < valid_config_row[0] && i < len(parts_row); i++ {
+			if parts_row[i] == '.' {
+				does_not_contain_dot = false
+			}
+		}
+		if valid_config_row[0] <= len(parts_row) && does_not_contain_dot && (valid_config_row[0] == len(parts_row) || parts_row[valid_config_row[0]] != '#') {
+			if len(parts_row) == valid_config_row[0] {
+				count += Recursive_Row(parts_row[valid_config_row[0]:], valid_config_row[1:])
+			} else {
+
+				count += Recursive_Row(parts_row[valid_config_row[0]+1:], valid_config_row[1:])
+			}
+		}
+	}
 
 	//fmt.Println("Returning recursive")
 
