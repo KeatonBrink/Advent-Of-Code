@@ -2,13 +2,17 @@ package main
 
 import (
 	"bufio"
-	"math"
+	"fmt"
 	"os"
+	"strconv"
+	"strings"
 )
 
 type Coordinate struct {
 	Row, Col int
 }
+
+var PROBLEM_MAP = make(map[string]int)
 
 func main() {
 	input_file_name := "input.txt"
@@ -28,93 +32,92 @@ func main() {
 		text = append(text, file_scanner.Text())
 	}
 
-	// Grab galaxies and create new
-	var galaxies []Coordinate
-	var galaxy_image [][]byte
-	for row, line := range text {
-		var line_bytes []byte
-		for col, character := range line {
-			line_bytes = append(line_bytes, byte(character))
-			if character == '#' {
-				galaxies = append(galaxies, Coordinate{Row: row, Col: col})
+	// Grab the records and groups
+	var damaged_condition_records [][]byte
+	var partial_arrangement_groups [][]int
+	for _, line := range text {
+		split_row := strings.Split(line, " ")
+		if len(split_row) != 2 {
+			panic("Split row split weird")
+		}
+		damaged_condition_records = append(damaged_condition_records, []byte(split_row[0]))
+		split_condition_records := strings.Split(split_row[1], ",")
+		var row_partial_arrangement []int
+		for _, num_as_string := range split_condition_records {
+			temp_condition, err := strconv.Atoi(num_as_string)
+			if err != nil {
+				panic(err)
 			}
+			row_partial_arrangement = append(row_partial_arrangement, temp_condition)
 		}
-		galaxy_image = append(galaxy_image, line_bytes)
+		partial_arrangement_groups = append(partial_arrangement_groups, row_partial_arrangement)
 	}
 
-	// Find any row that has to be repeated
-	double_row := make(map[int]bool)
-	for i_row, row := range galaxy_image {
-		found_galaxy := false
-		for _, char := range row {
-			if char == '#' {
-				found_galaxy = true
-				break
-			}
-		}
-		double_row[i_row] = !found_galaxy
+	possible_count := 0
+
+	for row_ind := 0; row_ind < len(damaged_condition_records); row_ind++ {
+		new_count := Recursive_Row(damaged_condition_records[row_ind], partial_arrangement_groups[row_ind])
+		fmt.Printf("\n\n\n\nLine %s, Count: %d\n\n\n\n\n", damaged_condition_records[row_ind], new_count)
+		possible_count += new_count
 	}
-
-	// Find any column that has to be repeated
-	double_col := make(map[int]bool)
-	for i_col := 0; i_col < len(galaxy_image[0]); i_col++ {
-		found_galaxy := false
-		for i_row := 0; i_row < len(galaxy_image); i_row++ {
-			if galaxy_image[i_row][i_col] == '#' {
-				found_galaxy = true
-				break
-			}
-		}
-		double_col[i_col] = !found_galaxy
-	}
-
-	total_distance := 0
-
-	// Start Calculating Distances
-	for i_start_galaxy, start_galaxy := range galaxies {
-		for i_other_galaxy := i_start_galaxy + 1; i_other_galaxy < len(galaxies); i_other_galaxy++ {
-			other_galaxy := galaxies[i_other_galaxy]
-			total_distance += int(math.Abs(float64(start_galaxy.Col)-float64(other_galaxy.Col))) + int(math.Abs(float64(start_galaxy.Row)-float64(other_galaxy.Row))) + FindDoubleDistances(start_galaxy, other_galaxy, double_row, double_col)
-
-		}
-	}
-
-	println(total_distance)
+	fmt.Printf("Final arrangement count: %d\n", possible_count)
 }
 
-func FindDoubleDistances(start_galaxy, other_galaxy Coordinate, double_row, double_col map[int]bool) int {
-	ret_doubles := 0
-	var cur_i int
-	var end_i int
-	if start_galaxy.Row < other_galaxy.Row {
-		cur_i = start_galaxy.Row + 1
-		end_i = other_galaxy.Row - 1
-	} else {
-		cur_i = other_galaxy.Row + 1
-		end_i = start_galaxy.Row - 1
+func Recursive_Row(parts_row []byte, valid_config_row []int) int {
+	problem_as_string := ProblemPartsToString(parts_row, valid_config_row)
+	val, ok := PROBLEM_MAP[problem_as_string]
+	if ok {
+		return val
+	}
+	//println("Starting recursive row")
+	//println(string(parts_row))
+	// Both slices are empty, then it worked
+	if len(parts_row) == 0 {
+		if len(valid_config_row) == 0 {
+			return 1
+		}
+		return 0
 	}
 
-	for ; cur_i <= end_i; cur_i++ {
-		if double_row[cur_i] {
-			ret_doubles += 1000000 - 1
-			// ret_doubles += 100 - 1
+	if len(valid_config_row) == 0 {
+		for i := 0; i < len(parts_row); i++ {
+			if parts_row[i] == '#' {
+				return 0
+			}
+		}
+		return 1
+	}
+
+	count := 0
+
+	if parts_row[0] == '.' || parts_row[0] == '?' {
+		count += Recursive_Row(parts_row[1:], valid_config_row)
+	}
+
+	if parts_row[0] == '#' || parts_row[0] == '?' {
+		does_not_contain_dot := true
+		for i := 0; i < valid_config_row[0] && i < len(parts_row); i++ {
+			if parts_row[i] == '.' {
+				does_not_contain_dot = false
+			}
+		}
+		if valid_config_row[0] <= len(parts_row) && does_not_contain_dot && (valid_config_row[0] == len(parts_row) || parts_row[valid_config_row[0]] != '#') {
+			if len(parts_row) == valid_config_row[0] {
+				count += Recursive_Row(parts_row[valid_config_row[0]:], valid_config_row[1:])
+			} else {
+
+				count += Recursive_Row(parts_row[valid_config_row[0]+1:], valid_config_row[1:])
+			}
 		}
 	}
 
-	if start_galaxy.Col < other_galaxy.Col {
-		cur_i = start_galaxy.Col + 1
-		end_i = other_galaxy.Col - 1
-	} else {
-		cur_i = other_galaxy.Col + 1
-		end_i = start_galaxy.Col - 1
-	}
+	PROBLEM_MAP[problem_as_string] = count
 
-	for ; cur_i <= end_i; cur_i++ {
-		if double_col[cur_i] {
-			ret_doubles += 1000000 - 1
-			// ret_doubles += 100 - 1
-		}
-	}
+	//fmt.Println("Returning recursive")
 
-	return ret_doubles
+	return count
+}
+
+func ProblemPartsToString(parts_row []byte, valid_config_row []int) string {
+	return string(parts_row) + " " + strings.Trim(strings.Join(strings.Fields(fmt.Sprint(valid_config_row)), ","), "[]")
 }
