@@ -46,28 +46,27 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			println(temp_condition)
 			row_partial_arrangement = append(row_partial_arrangement, temp_condition)
 		}
 		partial_arrangement_groups = append(partial_arrangement_groups, row_partial_arrangement)
 	}
 
-	println(string(damaged_condition_records[0]))
-
-	println()
 	possible_count := 0
 
 	for row_ind := 0; row_ind < len(damaged_condition_records); row_ind++ {
-		println(string(damaged_condition_records[row_ind]))
-		possible_count += Recursive_Row(damaged_condition_records[row_ind], partial_arrangement_groups[row_ind])
+		new_count := Recursive_Row(damaged_condition_records[row_ind], partial_arrangement_groups[row_ind])
+		fmt.Printf("\n\n\n\nLine %s, Count: %d\n\n\n\n\n", damaged_condition_records[row_ind], new_count)
+		possible_count += new_count
 	}
-	fmt.Printf("Final arrangement count: %d", possible_count)
+	fmt.Printf("Final arrangement count: %d\n", possible_count)
 }
 
 func Recursive_Row(parts_row []byte, valid_config_row []int) int {
+	//println("Starting recursive row")
+	//println(string(parts_row))
 	// Both slices are empty, then it worked
 	if len(parts_row) == 0 && len(valid_config_row) == 0 {
-		println("yello")
+		//println("All is empty, ret 1")
 		return 1
 	}
 	// If only the config input is empty
@@ -75,53 +74,61 @@ func Recursive_Row(parts_row []byte, valid_config_row []int) int {
 		// Ensure that there are no more confirmed parts left in byte slice input
 		for i := 0; i < len(parts_row); i++ {
 			if parts_row[i] == '#' {
-				println("# found")
+				//println("# found ret 0")
 				return 0
 			}
 		}
-		println("ello")
+		//println("No # found, ret 1")
 		return 1
 	}
 	// If there are no more parts, but are still configs, then return 0
 	if len(parts_row) == 0 {
-		println("Parts still left")
+		//println("Parts still left")
 		return 0
 	}
 	count := 0
 
-	var cur_parts_row []byte
-
-	copy(cur_parts_row, parts_row)
-
-	println(cur_parts_row)
-
-	for part_ind := 0; part_ind < len(cur_parts_row); part_ind++ {
-		if len(cur_parts_row) < valid_config_row[0] {
+	for part_ind := 0; part_ind < len(parts_row); part_ind++ {
+		//println("In for loop")
+		if len(parts_row[part_ind:]) < valid_config_row[0] {
+			//fmt.Printf("Curpart len %d, config val %d\n", len(parts_row), valid_config_row[0])
 			break
 		}
+		//fmt.Printf("%d %s %d\n", len(parts_row), string(parts_row), valid_config_row[0])
 		is_valid_config := true
 		// Cycle through
 		for temp_part_ind := part_ind; temp_part_ind < part_ind+valid_config_row[0]; temp_part_ind++ {
 			if parts_row[temp_part_ind] == '.' {
+				//println("Is not valid config")
 				is_valid_config = false
 				break
 			}
 		}
+		//println("Finish cycle")
 		if !is_valid_config {
+			//println("Is not valid config")
 			continue
 		}
-		r_parts_row := cur_parts_row[part_ind+valid_config_row[0]:]
-		if len(r_parts_row) == 1 && r_parts_row[0] == '#' {
-			continue
+		r_parts_row := parts_row[part_ind+valid_config_row[0]:]
+		if len(r_parts_row) > 0 {
+			if r_parts_row[0] == '#' {
+				//println("Found #")
+				continue
+			} else {
+				r_parts_row = r_parts_row[1:]
+			}
 		}
 
 		r_valid_config_row := valid_config_row[1:]
 
 		count += Recursive_Row(r_parts_row, r_valid_config_row)
 
+		if parts_row[part_ind] == '#' {
+			break
+		}
 	}
 
-	fmt.Println("Returning recursive")
+	//fmt.Println("Returning recursive")
 
 	return count
 }
