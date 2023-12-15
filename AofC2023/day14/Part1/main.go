@@ -6,9 +6,7 @@ import (
 	"os"
 )
 
-type Coordinate struct {
-	Row, Col int
-}
+var CYCLE_MEMORY = make(map[string][][]byte, 0)
 
 func main() {
 	input_file_name := "input.txt"
@@ -67,3 +65,35 @@ func main() {
 
 	fmt.Printf("Score: %d\n", total_load)
 }
+
+func OneCycle(rock_map [][]byte) (ret_bytes [][]byte) {
+	initial_byte_string := StringifySliceStrings(rock_map)
+
+	val, ok := CYCLE_MEMORY[initial_byte_string]
+	if ok {
+		return val
+	}
+
+	CYCLE_MEMORY[initial_byte_string] = ret_bytes
+	return
+}
+
+func StringifySliceStrings(bytes [][]byte) (str string) {
+	for _, line := range bytes {
+		str += string(line)
+	}
+	return
+}
+
+// Should not have done this
+// func DeStringifyToBytes(str string, bytes_slice_len int) (bytes [][]byte) {
+// 	for len(str) > 0 {
+// 		var temp_bytes []byte
+// 		for i := 0; i < bytes_slice_len; i++ {
+// 			temp_bytes = append(temp_bytes, str[i])
+// 		}
+// 		bytes = append(bytes, temp_bytes)
+// 		str = str[bytes_slice_len:]
+// 	}
+// 	return
+// }
