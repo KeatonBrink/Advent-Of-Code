@@ -6,13 +6,11 @@ import (
 	"os"
 )
 
-var CYCLE_MEMORY = make(map[string][][]byte, 0)
-
 var ITERATION_MEMORY = make(map[string]int)
 
 func main() {
-	// input_file_name := "input.txt"
-	input_file_name := "test_input.txt"
+	input_file_name := "input.txt"
+	// input_file_name := "test_input.txt"
 
 	read_file, err := os.Open(input_file_name)
 	if err != nil {
@@ -39,12 +37,31 @@ func main() {
 	}
 	println()
 
-	for cur_cycle := 0; cur_cycle < 1000000000; cur_cycle++ {
-		iteration_cycle := CheckDuplicate(rock_map, cur_cycle)
-		if iteration_cycle == -1 {
-			rock_map = OneCycle(rock_map, cur_cycle)
-		} else {
+	max_cycle := 1000000000
+	// max_cycle := 1
 
+	for cur_cycle := 0; cur_cycle < max_cycle; {
+		fmt.Printf("Cur Cycle %d\n", cur_cycle)
+		// PrintSliceSliceByte(rock_map)
+		rock_map = OneCycle(rock_map, cur_cycle)
+		// PrintSliceSliceByte(rock_map)
+		cur_cycle++
+		iteration_cycle := CheckDuplicate(rock_map, cur_cycle)
+		if iteration_cycle != -1 {
+			fmt.Printf("Iteration cycle %d\n", iteration_cycle)
+			cycle_range := cur_cycle - iteration_cycle
+			fmt.Printf("Cycle Range %d\n", cycle_range)
+			cycles_left := max_cycle - iteration_cycle
+			fmt.Printf("Cycles left %d\n", cycles_left)
+			cycles_to_skip := cycles_left / cycle_range
+			fmt.Printf("Cycles to skip %d\n", cycles_to_skip)
+			cur_cycle = iteration_cycle + (cycles_to_skip * cycle_range)
+			fmt.Printf("Cur Cycle %d\n", iteration_cycle)
+
+			if cur_cycle == max_cycle {
+				println("Max found")
+				break
+			}
 		}
 	}
 
@@ -65,7 +82,7 @@ func main() {
 func CheckDuplicate(rock_map [][]byte, iteration int) (duploop int) {
 	initial_byte_string := StringifySliceStrings(rock_map)
 
-	_, ok := CYCLE_MEMORY[initial_byte_string]
+	_, ok := ITERATION_MEMORY[initial_byte_string]
 	if ok {
 		return ITERATION_MEMORY[initial_byte_string]
 	}
@@ -78,10 +95,13 @@ func OneCycle(rock_map [][]byte, iteration int) (ret_bytes [][]byte) {
 
 	ret_bytes = make([][]byte, len(rock_map))
 	for i := 0; i < len(rock_map); i++ {
-		println("Making copy")
 		ret_bytes[i] = make([]byte, len(rock_map[i]))
 		copy(ret_bytes[i], rock_map[i])
 	}
+
+	println("Start")
+
+	// PrintSliceSliceByte(rock_map)
 
 	for iterative_row := 1; iterative_row < len(ret_bytes); iterative_row++ {
 		for column_of_row := 0; column_of_row < len(ret_bytes[iterative_row]); column_of_row++ {
@@ -98,7 +118,8 @@ func OneCycle(rock_map [][]byte, iteration int) (ret_bytes [][]byte) {
 		}
 	}
 
-	println(len(ret_bytes))
+	// PrintSliceSliceByte(ret_bytes)
+
 	for iterative_col := 1; iterative_col < len(ret_bytes[0]); iterative_col++ {
 		for row_of_column := 0; row_of_column < len(ret_bytes); row_of_column++ {
 			for temp_col := iterative_col; temp_col >= 1; temp_col-- {
@@ -114,7 +135,9 @@ func OneCycle(rock_map [][]byte, iteration int) (ret_bytes [][]byte) {
 		}
 	}
 
-	for iterative_row := len(ret_bytes) - 2; iterative_row > 0; iterative_row-- {
+	// PrintSliceSliceByte(ret_bytes)
+
+	for iterative_row := len(ret_bytes) - 2; iterative_row >= 0; iterative_row-- {
 		for column_of_row := 0; column_of_row < len(ret_bytes[iterative_row]); column_of_row++ {
 			for temp_row := iterative_row; temp_row < len(ret_bytes)-1; temp_row++ {
 				cur_val := &ret_bytes[temp_row][column_of_row]
@@ -129,7 +152,9 @@ func OneCycle(rock_map [][]byte, iteration int) (ret_bytes [][]byte) {
 		}
 	}
 
-	for iterative_col := len(ret_bytes) - 2; iterative_col > 0; iterative_col-- {
+	// PrintSliceSliceByte(ret_bytes)
+
+	for iterative_col := len(ret_bytes) - 2; iterative_col >= 0; iterative_col-- {
 		for row_of_column := 0; row_of_column < len(ret_bytes); row_of_column++ {
 			for temp_col := iterative_col; temp_col < len(ret_bytes[0])-1; temp_col++ {
 				cur_val := &ret_bytes[row_of_column][temp_col]
@@ -143,8 +168,8 @@ func OneCycle(rock_map [][]byte, iteration int) (ret_bytes [][]byte) {
 			}
 		}
 	}
+	// PrintSliceSliceByte(ret_bytes)
 
-	CYCLE_MEMORY[initial_byte_string] = ret_bytes
 	ITERATION_MEMORY[initial_byte_string] = iteration
 	return
 }
@@ -154,6 +179,13 @@ func StringifySliceStrings(bytes [][]byte) (str string) {
 		str += string(line)
 	}
 	return
+}
+
+func PrintSliceSliceByte(bytes [][]byte) {
+	for _, line := range bytes {
+		println(string(line))
+	}
+	println()
 }
 
 // Should not have done this
