@@ -4,10 +4,18 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strings"
 )
 
-var CYCLE_MEMORY = make(map[string][][]byte, 0)
+const (
+	Up = iota
+	Down
+	Left
+	Right
+)
+
+type EndOfLight struct {
+	Row, Col, Direction int
+}
 
 func main() {
 	input_file_name := "input.txt"
@@ -27,27 +35,28 @@ func main() {
 		text = append(text, file_scanner.Text())
 	}
 
-	var hash_input []string
+	mirror_layout := text
 
-	for _, line := range text {
-		strs := strings.Split(line, ",")
-		hash_input = append(hash_input, strs...)
+	var current_lights []EndOfLight
+
+	var visited_positions := 
+
+	start_pos := mirror_layout[0][0]
+
+	start_EOL := EndOfLight{Row: 0, Col: 0, Direction: Right}
+
+	if start_pos == '.' || start_pos == '-' {
+		current_lights = append(current_lights, start_EOL)
+	} else {
+		start_EOL.Direction = Down
+		current_lights = append(current_lights, start_EOL)
 	}
 
 	ret_val := 0
 
-	for _, string_to_hash := range hash_input {
-		ret_val += Hash(string_to_hash)
-	}
-
-	fmt.Printf("Val: %d\n", ret_val)
+	fmt.Printf("Final lens hash: %d\n", ret_val)
 }
 
-func Hash(str string) (current_value int) {
-	for _, chr := range str {
-		current_value += int(chr)
-		current_value *= 17
-		current_value %= 256
-	}
-	return
+struct EOLToString(eol EndOfLight) string {
+	return string(eol.Row) + "," string(eol.Col) + "," + string(Direction)
 }
