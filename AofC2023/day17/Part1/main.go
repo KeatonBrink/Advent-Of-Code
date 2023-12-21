@@ -110,8 +110,6 @@ func main() {
 	}
 
 	visited_spots[0][0] = true
-	visited_spots[1][0] = true
-	visited_spots[0][1] = true
 
 	//Will be initially 2 items on heap
 	pq := make(PriorityQueue, 2)
@@ -131,13 +129,33 @@ func main() {
 	heap.Init(&pq)
 
 	best_path_val := 0
+	bpd := -1
+	prior := 0
 
-	for len(pq) > 0 {
+	for r_counter := 0; len(pq) > 0; r_counter++ {
+		// println("StartOfLoop")
+		heap.Init(&pq)
+		// for _, hi := range pq {
+		// 	PrintHeapItem(*hi)
+		// }
+		// PrintSliceSliceBool(visited_spots)
 		cur_heap_item := heap.Pop(&pq).(*HeapItem)
+		if visited_spots[cur_heap_item.value.Row][cur_heap_item.value.Col] {
+			continue
+		}
+		visited_spots[cur_heap_item.value.Row][cur_heap_item.value.Col] = true
+		if prior > cur_heap_item.priority {
+			fmt.Printf("Prior %d, current %d", prior, cur_heap_item.priority)
+			panic("Uh")
+		}
+		prior = cur_heap_item.priority
 		if cur_heap_item.value.Row == len(heat_map)-1 && cur_heap_item.value.Col == len(heat_map[0])-1 {
 			best_path_val = cur_heap_item.priority
+			bpd = cur_heap_item.value.InputDirection
 			break
 		}
+		// println("Hello")
+		// PrintHeapItem(*cur_heap_item)
 		switch cur_heap_item.value.InputDirection {
 		case Up:
 			if cur_heap_item.value.StraightLineDistance <= 3 && cur_heap_item.value.Row < len(heat_map)-1 {
@@ -146,10 +164,7 @@ func main() {
 				next_heap_item.value.StraightLineDistance++
 				next_heap_item.value.HeatLoss += heat_map[next_heap_item.value.Row][next_heap_item.value.Col]
 				next_heap_item.priority = next_heap_item.value.HeatLoss
-				if !visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] {
-					visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] = true
-					pq.PushOrdered(next_heap_item)
-				}
+				pq.PushOrdered(next_heap_item)
 			}
 			if cur_heap_item.value.Col < len(heat_map[0])-1 {
 				next_heap_item := CopyHeapItem(*cur_heap_item)
@@ -158,10 +173,7 @@ func main() {
 				next_heap_item.value.InputDirection = Left
 				next_heap_item.value.HeatLoss += heat_map[next_heap_item.value.Row][next_heap_item.value.Col]
 				next_heap_item.priority = next_heap_item.value.HeatLoss
-				if !visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] {
-					visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] = true
-					pq.PushOrdered(next_heap_item)
-				}
+				pq.PushOrdered(next_heap_item)
 			}
 			if cur_heap_item.value.Col > 0 {
 				next_heap_item := CopyHeapItem(*cur_heap_item)
@@ -170,10 +182,7 @@ func main() {
 				next_heap_item.value.InputDirection = Right
 				next_heap_item.value.HeatLoss += heat_map[next_heap_item.value.Row][next_heap_item.value.Col]
 				next_heap_item.priority = next_heap_item.value.HeatLoss
-				if !visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] {
-					visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] = true
-					pq.PushOrdered(next_heap_item)
-				}
+				pq.PushOrdered(next_heap_item)
 			}
 		case Down:
 			if cur_heap_item.value.StraightLineDistance <= 3 && cur_heap_item.value.Row > 0 {
@@ -182,10 +191,7 @@ func main() {
 				next_heap_item.value.StraightLineDistance++
 				next_heap_item.value.HeatLoss += heat_map[next_heap_item.value.Row][next_heap_item.value.Col]
 				next_heap_item.priority = next_heap_item.value.HeatLoss
-				if !visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] {
-					visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] = true
-					pq.PushOrdered(next_heap_item)
-				}
+				pq.PushOrdered(next_heap_item)
 			}
 			if cur_heap_item.value.Col < len(heat_map[0])-1 {
 				next_heap_item := CopyHeapItem(*cur_heap_item)
@@ -194,10 +200,7 @@ func main() {
 				next_heap_item.value.InputDirection = Left
 				next_heap_item.value.HeatLoss += heat_map[next_heap_item.value.Row][next_heap_item.value.Col]
 				next_heap_item.priority = next_heap_item.value.HeatLoss
-				if !visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] {
-					visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] = true
-					pq.PushOrdered(next_heap_item)
-				}
+				pq.PushOrdered(next_heap_item)
 			}
 			if cur_heap_item.value.Col > 0 {
 				next_heap_item := CopyHeapItem(*cur_heap_item)
@@ -206,10 +209,7 @@ func main() {
 				next_heap_item.value.InputDirection = Right
 				next_heap_item.value.HeatLoss += heat_map[next_heap_item.value.Row][next_heap_item.value.Col]
 				next_heap_item.priority = next_heap_item.value.HeatLoss
-				if !visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] {
-					visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] = true
-					pq.PushOrdered(next_heap_item)
-				}
+				pq.PushOrdered(next_heap_item)
 			}
 		case Right:
 			if cur_heap_item.value.StraightLineDistance <= 3 && cur_heap_item.value.Col > 0 {
@@ -218,10 +218,7 @@ func main() {
 				next_heap_item.value.StraightLineDistance++
 				next_heap_item.value.HeatLoss += heat_map[next_heap_item.value.Row][next_heap_item.value.Col]
 				next_heap_item.priority = next_heap_item.value.HeatLoss
-				if !visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] {
-					visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] = true
-					pq.PushOrdered(next_heap_item)
-				}
+				pq.PushOrdered(next_heap_item)
 			}
 			if cur_heap_item.value.Row < len(heat_map[0])-1 {
 				next_heap_item := CopyHeapItem(*cur_heap_item)
@@ -230,10 +227,7 @@ func main() {
 				next_heap_item.value.InputDirection = Up
 				next_heap_item.value.HeatLoss += heat_map[next_heap_item.value.Row][next_heap_item.value.Col]
 				next_heap_item.priority = next_heap_item.value.HeatLoss
-				if !visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] {
-					visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] = true
-					pq.PushOrdered(next_heap_item)
-				}
+				pq.PushOrdered(next_heap_item)
 			}
 			if cur_heap_item.value.Row > 0 {
 				next_heap_item := CopyHeapItem(*cur_heap_item)
@@ -242,10 +236,7 @@ func main() {
 				next_heap_item.value.InputDirection = Down
 				next_heap_item.value.HeatLoss += heat_map[next_heap_item.value.Row][next_heap_item.value.Col]
 				next_heap_item.priority = next_heap_item.value.HeatLoss
-				if !visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] {
-					visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] = true
-					pq.PushOrdered(next_heap_item)
-				}
+				pq.PushOrdered(next_heap_item)
 			}
 		case Left:
 			if cur_heap_item.value.StraightLineDistance <= 3 && cur_heap_item.value.Col < len(heat_map[0])-1 {
@@ -254,10 +245,7 @@ func main() {
 				next_heap_item.value.StraightLineDistance++
 				next_heap_item.value.HeatLoss += heat_map[next_heap_item.value.Row][next_heap_item.value.Col]
 				next_heap_item.priority = next_heap_item.value.HeatLoss
-				if !visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] {
-					visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] = true
-					pq.PushOrdered(next_heap_item)
-				}
+				pq.PushOrdered(next_heap_item)
 			}
 			if cur_heap_item.value.Row < len(heat_map[0])-1 {
 				next_heap_item := CopyHeapItem(*cur_heap_item)
@@ -266,10 +254,7 @@ func main() {
 				next_heap_item.value.InputDirection = Up
 				next_heap_item.value.HeatLoss += heat_map[next_heap_item.value.Row][next_heap_item.value.Col]
 				next_heap_item.priority = next_heap_item.value.HeatLoss
-				if !visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] {
-					visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] = true
-					pq.PushOrdered(next_heap_item)
-				}
+				pq.PushOrdered(next_heap_item)
 			}
 			if cur_heap_item.value.Row > 0 {
 				next_heap_item := CopyHeapItem(*cur_heap_item)
@@ -278,15 +263,15 @@ func main() {
 				next_heap_item.value.InputDirection = Down
 				next_heap_item.value.HeatLoss += heat_map[next_heap_item.value.Row][next_heap_item.value.Col]
 				next_heap_item.priority = next_heap_item.value.HeatLoss
-				if !visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] {
-					visited_spots[next_heap_item.value.Row][next_heap_item.value.Col] = true
-					pq.PushOrdered(next_heap_item)
-				}
+				pq.PushOrdered(next_heap_item)
 			}
 		}
 	}
 
-	fmt.Printf("Best Path Val: %d\n", best_path_val)
+	// PrintSliceSliceBool(visited_spots)
+
+	fmt.Printf("Best Path Val: %d %d\n", best_path_val, bpd)
+	println(Right)
 }
 
 func CopyHeapItem(hi HeapItem) *HeapItem {
@@ -299,4 +284,21 @@ func CopyHeapItem(hi HeapItem) *HeapItem {
 	new_hi.priority = hi.priority
 	new_hi.index = hi.index
 	return &new_hi
+}
+
+func PrintHeapItem(hi HeapItem) {
+	fmt.Printf("Row %d Col %d SLD %d HeatLoss %d ID %d Priority %d index %d\n", hi.value.Row, hi.value.Col, hi.value.StraightLineDistance, hi.value.HeatLoss, hi.value.InputDirection, hi.priority, hi.index)
+}
+
+func PrintSliceSliceBool(ssb [][]bool) {
+	for _, line := range ssb {
+		for _, b_val := range line {
+			if b_val {
+				print("T")
+			} else {
+				print("F")
+			}
+		}
+		println()
+	}
 }
