@@ -74,8 +74,8 @@ func (pq *PriorityQueue) update(item *HeapItem, value EndOfPath, priority int) {
 }
 
 func main() {
-	// input_file_name := "input.txt"
-	input_file_name := "test_input.txt"
+	input_file_name := "input.txt"
+	// input_file_name := "test_input.txt"
 
 	read_file, err := os.Open(input_file_name)
 	if err != nil {
@@ -115,8 +115,8 @@ func main() {
 
 	//Will be initially 2 items on heap
 	pq := make(PriorityQueue, 2)
-	pq_0_val := EndOfPath{Row: 0, Col: 1, StraightLineDistance: 1, HeatLoss: heat_map[0][1], InputDirection: Left}
-	pq_1_val := EndOfPath{Row: 1, Col: 0, StraightLineDistance: 1, HeatLoss: heat_map[1][0], InputDirection: Up}
+	pq_0_val := EndOfPath{Row: 0, Col: 1, StraightLineDistance: 2, HeatLoss: heat_map[0][1], InputDirection: Left}
+	pq_1_val := EndOfPath{Row: 1, Col: 0, StraightLineDistance: 2, HeatLoss: heat_map[1][0], InputDirection: Up}
 
 	pq[0] = &HeapItem{
 		value:    pq_0_val,
