@@ -17,6 +17,7 @@ func main() {
 	}
 
 	good_reports := 0
+	tests := 0
 
 	for _, line := range input {
 		string_ints := strings.Split(line, " ")
@@ -30,34 +31,47 @@ func main() {
 			numbers = append(numbers, single_int)
 		}
 
-		is_valid_line := false
+		is_valid_line := isGoodLine(numbers)
+		tests++
 
-		is_safe, problem_index := isGoodLine(numbers)
-		if !is_safe {
-			if problem_index < len(numbers)-1 {
-				numbers = append(numbers[:problem_index], numbers[problem_index+1:]...)
-			} else {
-				numbers = numbers[:len(numbers)-1]
+		if !is_valid_line {
+			for i := 0; i < len(numbers); i++ {
+				copy_numbers := copyLineAndRemoveAtIndex(numbers, i)
+				is_valid_line = isGoodLine(copy_numbers)
+				tests++
+				if is_valid_line {
+					break
+				}
 			}
-			is_safe, _ = isGoodLine(numbers)
 		}
-		if is_safe {
-			// fmt.Println("End Good Line: ", line, "\n\n\n")
+		if is_valid_line {
 			good_reports++
-		} else {
-			fmt.Println("End Bad line: ", line, "\n\n\n")
 		}
 	}
 
-	fmt.Println("Good Reports: ", good_reports)
+	fmt.Println("Good Reports: ", good_reports, " Tests: ", tests)
 }
 
-func isGoodLine(numbers []int) (bool, int) {
+func copyLineAndRemoveAtIndex(numbers []int, index int) []int {
+	copy_numbers := make([]int, len(numbers))
+	copy(copy_numbers, numbers)
+	if index == 0 {
+		copy_numbers = copy_numbers[1:]
+	} else if index == len(numbers)-1 {
+		copy_numbers = copy_numbers[:len(copy_numbers)-1]
+	} else {
+		copy_numbers = append(copy_numbers[:index], numbers[index+1:]...)
+	}
+	fmt.Println("Copied: ", copy_numbers, " Original: ", numbers)
+	return copy_numbers
+}
+
+func isGoodLine(numbers []int) bool {
 	increases := 0
 	decreases := 0
 	prev := 0
 	is_first := true
-	for i, elem := range numbers {
+	for _, elem := range numbers {
 		is_safe := true
 		if is_first {
 			is_first = false
@@ -69,7 +83,7 @@ func isGoodLine(numbers []int) (bool, int) {
 			} else if difference < 0 {
 				decreases++
 			}
-			temp := difference
+			// temp := difference
 			difference = int(math.Abs(float64(difference)))
 			// difference is less than 1 or greater than three
 			// Which is bad
@@ -80,22 +94,18 @@ func isGoodLine(numbers []int) (bool, int) {
 				is_safe = false
 			}
 			if !is_safe {
-				fmt.Println("Is Bad")
-				fmt.Println("Difference: ", temp)
-				fmt.Println("Increases ", increases, "\nDecreases", decreases)
-				fmt.Println("Elements: ", elem, prev)
-				fmt.Println("Index: ", i)
-				fmt.Println("Line: ", numbers)
-				if i == len(numbers)-1 {
-					return false, i
-				} else {
-					return false, i - 1
-				}
+				// fmt.Println("Is Bad")
+				// fmt.Println("Difference: ", temp)
+				// fmt.Println("Increases ", increases, "\nDecreases", decreases)
+				// fmt.Println("Elements: ", elem, prev)
+				// fmt.Println("Index: ", i)
+				// fmt.Println("Line: ", numbers)
+				return false
 			}
 		}
 		prev = elem
 	}
-	return true, -1
+	return true
 }
 
 func getInputAsLines() ([]string, error) {
