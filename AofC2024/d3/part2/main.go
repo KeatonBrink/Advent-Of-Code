@@ -13,22 +13,28 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	// re := regexp.MustCompile("mul\\(([1-9]+)([0-9]?)([0-9]?),[:space:]([1-9]+)([0-9]?)([0-9]?)\\)")
 	re := regexp.MustCompile("(mul\\(([1-9])([0-9]*),([1-9])([0-9]*)\\))|(do\\(\\))|(don't\\(\\))")
 	output := 0
+	is_active := true
 	for _, line := range input {
 		fmt.Println(line)
-		multipliers := re.FindAll([]byte(line), -1)
-		fmt.Printf("%q\n", multipliers)
-		for _, multi := range multipliers {
-			var a int
-			var b int
-			_, err := fmt.Sscanf(string(multi), "mul(%d,%d)", &a, &b)
-			if err != nil {
-				fmt.Println(err)
-				return
+		instructions := re.FindAll([]byte(line), -1)
+		fmt.Printf("%q\n", instructions)
+		for _, instruction := range instructions {
+			if string(instruction) == "do()" {
+				is_active = true
+			} else if string(instruction) == "don't()" {
+				is_active = false
+			} else if is_active {
+				var a int
+				var b int
+				_, err := fmt.Sscanf(string(instruction), "mul(%d,%d)", &a, &b)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				output += (a * b)
 			}
-			output += (a * b)
 		}
 	}
 	fmt.Println("Final Output: ", output)

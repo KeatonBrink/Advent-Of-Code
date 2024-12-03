@@ -13,7 +13,6 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	// re := regexp.MustCompile("mul\\(([1-9]+)([0-9]?)([0-9]?),[:space:]([1-9]+)([0-9]?)([0-9]?)\\)")
 	re := regexp.MustCompile("mul\\(([1-9])([0-9]*),([1-9])([0-9]*)\\)")
 	output := 0
 	for _, line := range input {
