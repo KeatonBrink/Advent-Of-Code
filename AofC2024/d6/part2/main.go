@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 )
 
 const (
@@ -23,8 +24,11 @@ type Person struct {
 }
 
 type VisitedSpot struct {
-	isVisited bool
-	direction int
+	is_spot_visited bool
+	direction_up    bool
+	direction_right bool
+	direction_down  bool
+	direction_left  bool
 }
 
 func main() {
@@ -37,9 +41,9 @@ func main() {
 	rows := len(input)
 	cols := len(input[0])
 
-	is_visited := make([][]bool, rows)
+	is_visited := make([][]VisitedSpot, rows)
 	for i := 0; i < rows; i++ {
-		is_visited[i] = make([]bool, cols)
+		is_visited[i] = make([]VisitedSpot, cols)
 	}
 
 	guard := Person{direction: up}
@@ -51,7 +55,7 @@ func main() {
 			if col == '^' {
 				guard.col = ci
 				guard.row = ri
-				is_visited[ri][ci] = true
+				is_visited[ri][ci] = VisitedSpot{is_spot_visited: true, direction_up: true}
 				input[ri] = strings.Replace(input[ri], "^", ".", 1)
 				player_found = true
 				break
@@ -62,11 +66,35 @@ func main() {
 		}
 	}
 
+	is_loop_ch := make(chan bool)
+
 	lab_layout := input
 
-	run_count := 0
-	for !guard.isEnd(rows, cols) {
-		run_count++
+	var wg sync.WaitGroup
+
+	loop_count := 0
+
+	fmt.Println("Rows, Cols: ", rows, cols)
+	fmt.Println("Final: ", loop_count)
+}
+
+func runSimulation(lab_layout_orig []string, guard_orig Person, is_visited_orig [][]VisitedSpot, obstruction_row, obstruction_col int, wg *sync.WaitGroup, is_loop_chan chan<- bool) {
+	defer (*wg).Done()
+	var lab_layout []string
+	copy(lab_layout, lab_layout_orig)
+	rows := len(lab_layout)
+	cols := len(lab_layout[0])
+	guard := guard_orig
+	is_visited := make([][]VisitedSpot, rows)
+	for _, row := range rows {
+		row = make([]VisitedSpot, cols)
+		for _, col :=
+	}
+	copy(is_visited, is_visited_orig)
+
+
+
+	for !guard.isEndOfLab(rows, cols) {
 		if guard.direction == up {
 			if lab_layout[guard.row-1][guard.col] == '.' {
 				guard.row--
@@ -92,33 +120,30 @@ func main() {
 				guard.direction = up
 			}
 		}
-		is_visited[guard.row][guard.col] = true
-	}
-
-	visit_count := 0
-
-	// Count visits
-	for _, row := range is_visited {
-		for _, elem := range row {
-			if elem {
-				visit_count++
-			}
+		visited_spot := is_visited[guard.row][guard.col]
+		visited_spot.is_spot_visited = true
+		switch guard.direction {
+		case up:
+			visited_spot.direction_up = true
+		case right:
+			visited_spot.direction_right = true
+		case down:
+			visited_spot.direction_down = true
+		case left:
+			visited_spot.direction_left = true
 		}
 	}
-
-	fmt.Println("Rows, Cols: ", rows, cols)
-	fmt.Println("Final: ", visit_count, " Run Count: ", run_count)
 }
 
 // func testWorker
 
-func (p Person) isEnd(rows int, cols int) bool {
+func (p Person) isEndOfLab(rows int, cols int) bool {
 	return (p.col == 0 && p.direction == left) || (p.row == 0 && p.direction == up) || (p.row == rows-1 && p.direction == down) || (p.col == cols-1 && p.direction == right)
 }
 
 func getInputAsLines() ([]string, error) {
 	// Read in files
-	f, err := os.Open("input.txt")
+	f, err := os.Open("test.txt")
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
