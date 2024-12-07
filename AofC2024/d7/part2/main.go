@@ -17,6 +17,7 @@ type ParsedEquation struct {
 const (
 	plus     = iota
 	multiply = iota
+	concat   = iota
 )
 
 func main() {
@@ -53,28 +54,40 @@ func main() {
 	for _, equation := range equations {
 		upper_limit := int(math.Pow(2, float64(len(equation.inputs)-1)))
 		fmt.Println("Upper limit: ", upper_limit)
-		for encoded_operations := 0; encoded_operations < upper_limit; encoded_operations++ {
-			operations := convertIntToOperations(encoded_operations, upper_limit)
-			if equation.isSumEqual(operations) {
+		encoded_operations := make([]int, len(equation.inputs)-1)
+		for !isOverCapacity(encoded_operations) {
+			// fmt.Println("Encoded: ", encoded_operations)
+			if equation.isSumEqual(encoded_operations) {
+				fmt.Println("Success: ", equation)
 				sum += equation.goal
 				break
 			}
+			stepEncodedOperations(encoded_operations)
 		}
 	}
 	fmt.Println("Sum: ", sum)
 }
 
-func convertIntToOperations(encoded_operations, upper_limit int) []int {
-
-	operations := []int{}
-	for upper_limit > 1 {
-		operation := encoded_operations & 1
-		operations = append(operations, operation)
-		encoded_operations = encoded_operations >> 1
-		upper_limit = upper_limit >> 1
+func stepEncodedOperations(encoded_operations []int) {
+	for i := 0; i < len(encoded_operations); i++ {
+		encoded_operations[i]++
+		if i == len(encoded_operations)-1 && encoded_operations[i] > 2 {
+			break
+		}
+		if encoded_operations[i] <= 2 {
+			break
+		}
+		encoded_operations[i] = 0
 	}
-	fmt.Println("Operations: ", operations)
-	return operations
+}
+
+func isOverCapacity(encoded_operations []int) bool {
+	for _, operation := range encoded_operations {
+		if operation > 2 {
+			return true
+		}
+	}
+	return false
 }
 
 func (pe ParsedEquation) isSumEqual(operations []int) bool {
@@ -94,6 +107,13 @@ func (pe ParsedEquation) isSumEqual(operations []int) bool {
 			ret_val += temp_val
 		} else if temp_operation == multiply {
 			ret_val *= temp_val
+		} else if temp_operation == concat {
+			concat, err := strconv.Atoi(fmt.Sprintf("%d%d", ret_val, temp_val))
+			if err != nil {
+				fmt.Println(err)
+				return false
+			}
+			ret_val = concat
 		}
 	}
 
