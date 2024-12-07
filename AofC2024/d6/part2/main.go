@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 )
 
 const (
@@ -65,11 +66,13 @@ func main() {
 		}
 	}
 
-	is_loop_ch := make(chan bool, 100)
+	is_loop_ch := make(chan bool)
 
 	lab_layout := input
 
 	go_routine_count := -1
+
+	start := time.Now()
 
 	for ri, row := range lab_layout {
 		for ci, elem := range row {
@@ -89,7 +92,10 @@ func main() {
 		}
 	}
 
-	fmt.Println("Rows, Cols: ", rows, cols)
+	elapsed := time.Since(start)
+
+	fmt.Println("Time Passed (ms): ", elapsed.Milliseconds())
+
 	fmt.Println("Final: ", loop_count)
 }
 
