@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"math"
 	"os"
 )
 
@@ -37,11 +36,6 @@ func main() {
 	// Cycle through every spot to look for distances
 	for ri, row := range city {
 		for ci, col := range row {
-			// for key, val := range blank_ant_distances {
-			// 	fmt.Println(key, val)
-			// }
-			// fmt.Println()
-			cur_ant_distance_map := copyAntDistanceMap(blank_ant_distances)
 			cur_ant_slope_map := copyAntDistanceMap(blank_ant_distances)
 			spot_found := false
 			if col != '.' {
@@ -57,11 +51,9 @@ func main() {
 					}
 					// Unnecessary, but feels clearier
 					cur_ant := cur_spot
-					dist := getDistanceBetweenPoints(ri, ci, cur_ri, cur_ci)
 					slope := getSlopeBetweenPoints(ri, ci, cur_ri, cur_ci)
-					prev_ant_distances := cur_ant_distance_map[cur_ant]
 					prev_ant_slopes := cur_ant_slope_map[cur_ant]
-					for padi := range prev_ant_distances {
+					for padi := range prev_ant_slopes {
 						if slope == prev_ant_slopes[padi] {
 							// fmt.Println("ri1, ci1, ri2, ci2", ri, ci, cur_ri, cur_ci)
 							// fmt.Println("Dist1, Dist2", dist, prev_ant_dist)
@@ -74,8 +66,6 @@ func main() {
 					if spot_found {
 						break
 					} else {
-						prev_ant_distances = append(prev_ant_distances, dist)
-						cur_ant_distance_map[cur_ant] = prev_ant_distances
 						prev_ant_slopes = append(prev_ant_slopes, slope)
 						cur_ant_slope_map[cur_ant] = prev_ant_slopes
 					}
@@ -84,10 +74,6 @@ func main() {
 					break
 				}
 			}
-			// for key, val := range cur_ant_distance_map {
-			// 	fmt.Println(key, val)
-			// }
-			// fmt.Println()
 		}
 	}
 
@@ -96,12 +82,6 @@ func main() {
 
 func getSlopeBetweenPoints(ri1, ci1, ri2, ci2 int) float64 {
 	return float64(ci2-ci1) / float64(ri2-ri1)
-}
-
-func getDistanceBetweenPoints(ri1, ci1, ri2, ci2 int) float64 {
-	dr := math.Pow(float64(ri1-ri2), 2)
-	dc := math.Pow(float64(ci1-ci2), 2)
-	return math.Sqrt(dr + dc)
 }
 
 func copyAntDistanceMap(og_map map[rune][]float64) map[rune][]float64 {
