@@ -36,7 +36,7 @@ func main() {
 	// Lots of logic that should probably be broken down
 	// Cycle through every spot to look for distances
 	for ri, row := range city {
-		for ci := range row {
+		for ci, col := range row {
 			// for key, val := range blank_ant_distances {
 			// 	fmt.Println(key, val)
 			// }
@@ -44,10 +44,14 @@ func main() {
 			cur_ant_distance_map := copyAntDistanceMap(blank_ant_distances)
 			cur_ant_slope_map := copyAntDistanceMap(blank_ant_distances)
 			spot_found := false
+			if col != '.' {
+				spots_found++
+				continue
+			}
 			// Compare current spot against all others
 			for cur_ri, cur_row := range city {
 				for cur_ci, cur_spot := range cur_row {
-					if cur_spot == '.' || (ri == cur_ri || ci == cur_ci) {
+					if cur_spot == '.' {
 						// Not antannae
 						continue
 					}
@@ -57,11 +61,11 @@ func main() {
 					slope := getSlopeBetweenPoints(ri, ci, cur_ri, cur_ci)
 					prev_ant_distances := cur_ant_distance_map[cur_ant]
 					prev_ant_slopes := cur_ant_slope_map[cur_ant]
-					for padi, prev_ant_dist := range prev_ant_distances {
-						if (dist*2 == prev_ant_dist || dist/2 == prev_ant_dist) && slope == prev_ant_slopes[padi] {
-							fmt.Println("ri1, ci1, ri2, ci2", ri, ci, cur_ri, cur_ci)
-							fmt.Println("Dist1, Dist2", dist, prev_ant_dist)
-							fmt.Println()
+					for padi := range prev_ant_distances {
+						if slope == prev_ant_slopes[padi] {
+							// fmt.Println("ri1, ci1, ri2, ci2", ri, ci, cur_ri, cur_ci)
+							// fmt.Println("Dist1, Dist2", dist, prev_ant_dist)
+							// fmt.Println()
 							spots_found++
 							spot_found = true
 							break
