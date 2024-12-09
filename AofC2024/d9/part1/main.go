@@ -18,7 +18,7 @@ func main() {
 
 	max_sum := 0
 	for i, elem := range input[0] {
-		elem_int := int(elem)
+		elem_int := int(elem) - '0'
 		if i%2 == 0 {
 			max_sum += elem_int
 		}
@@ -40,6 +40,7 @@ func main() {
 
 		if start_map_index%2 == 0 {
 			file_id := getIDFromIndex(start_map_index)
+			fmt.Println("File Repeats", file_id_repeats)
 			for i := 0; i < file_id_repeats; i++ {
 				fmt.Println("Checksum: ", checksum, " += ", no_gap_index, " * ", file_id)
 				checksum += no_gap_index * file_id
