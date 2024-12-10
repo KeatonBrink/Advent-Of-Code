@@ -12,71 +12,67 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(input)
 
 	var disk_map []int
 
-	max_sum := 0
-	for i, elem := range input[0] {
+	for _, elem := range input[0] {
 		elem_int := int(elem) - '0'
-		if i%2 == 0 {
-			max_sum += elem_int
-		}
 		disk_map = append(disk_map, elem_int)
 	}
 
-	fmt.Println("Max index: ", max_sum)
+	// Expand the disk, -1 is .
+
+	var expanded_notation []int
+
+	for disk_map_index, elem := range disk_map {
+		var id int
+		if disk_map_index%2 == 0 {
+			id = getIDFromIndex(disk_map_index)
+		} else {
+			id = -1
+		}
+		for cur_rep := 0; cur_rep < elem; cur_rep++ {
+			expanded_notation = append(expanded_notation, id)
+		}
+	}
+
+	end_index := len(expanded_notation) - 1
+
+	// Start swapping
+	for spot_index, spot := range expanded_notation {
+		if spot == -1 {
+			if spot_index >= end_index {
+				break
+			}
+			expanded_notation[spot_index] = expanded_notation[end_index]
+			expanded_notation[end_index] = -1
+			for ; end_index > 0 && expanded_notation[end_index] == -1; end_index-- {
+			}
+		}
+	}
+
+	fmt.Println(expanded_notation)
 
 	checksum := 0
-	start_map_index := 0
-	end_map_index := len(disk_map) - 1
-	end_file_repeats := 0
-	end_file_id := 0
-
-	no_gap_index := 0
-
-	for start_map_index <= end_map_index {
-		file_id_repeats := disk_map[start_map_index]
-
-		if start_map_index%2 == 0 {
-			file_id := getIDFromIndex(start_map_index)
-			fmt.Println("File Repeats", file_id_repeats)
-			for i := 0; i < file_id_repeats; i++ {
-				fmt.Println("Checksum: ", checksum, " += ", no_gap_index, " * ", file_id)
-				checksum += no_gap_index * file_id
-				no_gap_index++
-			}
-			fmt.Println("End of loop")
-		} else if start_map_index%2 == 1 {
-			for i := 0; i < file_id_repeats; i++ {
-				if end_file_repeats == 0 {
-					end_file_repeats = disk_map[end_map_index]
-					end_file_id = getIDFromIndex(end_map_index)
-				}
-				fmt.Println("Checksum: ", checksum, " += ", no_gap_index, " * ", end_file_id)
-				checksum += no_gap_index * end_file_id
-				no_gap_index++
-				end_file_repeats--
-				if end_file_repeats == 0 {
-					end_map_index -= 2
-				}
-			}
-			fmt.Println("End of loop")
+	// Start Counting
+	for spot_index, spot := range expanded_notation {
+		if spot == -1 {
+			break
 		}
-		start_map_index++
+		checksum += (spot_index * spot)
 	}
 
 	fmt.Println("Final: ", checksum)
 }
 
 func getIDFromIndex(i int) int {
-	fmt.Println("i: ", i)
+	// fmt.Println("i: ", i)
 	return i / 2
 }
 
 func getInputAsLines() ([]string, error) {
 	// Read in files
-	f, err := os.Open("test.txt")
+	f, err := os.Open("input.txt")
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
