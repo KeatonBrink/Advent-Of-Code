@@ -35,57 +35,35 @@ func main() {
 	}
 
 	// Map stone engraving to map of depths to stones
-	var memo map[int]map[int][]int
+	memo := make(map[int]map[int]int)
 
-	total_blinks := 25
-	for blink := 0; blink < total_blinks; blink++ {
-		// fmt.Println(stones)
-		var new_stones []int
-		for stone_index, stone := range stones {
-			if stone == 0 {
-				stones[stone_index] = 1
-				continue
-			}
-			string_stone := strconv.Itoa(stone)
-			if len(string_stone)%2 == 0 {
-				a_string := string_stone[:len(string_stone)/2]
-				b_string := string_stone[len(string_stone)/2:]
-				a, err := strconv.Atoi(a_string)
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-				b, err := strconv.Atoi(b_string)
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-				stones[stone_index] = a
-				new_stones = append(new_stones, b)
-				continue
-			}
-			if len(string_stone)%2 == 1 {
-				stones[stone_index] = stone * 2024
-				continue
-			}
-		}
-		stones = append(stones, new_stones...)
+	total_stones := 0
+	total_blinks := 75
+	for _, stone := range stones {
+		total_stones += descend(0, total_blinks, stone, memo)
+		// fmt.Println("z Total stones starting with x at y blinks", total_stones, stone, total_blinks)
 	}
 
-	fmt.Println("Final: ", len(stones))
+	fmt.Println("Final: ", total_stones)
 }
 
 func descend(cur_blink, max_blink, self int, map_in_map map[int]map[int]int) int {
+	// fmt.Println(cur_blink, self)
 	if cur_blink == max_blink {
-		return self
+		return 1
 	}
-	val, ok := map_in_map[self][cur_blink]
-	if ok {
-		return val
+	memo_val := getElemMapInMap(self, cur_blink, map_in_map)
+	if memo_val >= 0 {
+		return memo_val
 	}
 	if self == 0 {
 		temp_val := descend(cur_blink+1, max_blink, self+1, map_in_map)
+		_, ok := map_in_map[self]
+		if !ok {
+			map_in_map[self] = make(map[int]int)
+		}
 		map_in_map[self][cur_blink] = temp_val
+		// fmt.Println(temp_val)
 		return temp_val
 	}
 	string_stone := strconv.Itoa(self)
@@ -96,16 +74,41 @@ func descend(cur_blink, max_blink, self int, map_in_map map[int]map[int]int) int
 		if err != nil {
 			fmt.Println(err)
 		}
+		a_ret := descend(cur_blink+1, max_blink, a, map_in_map)
 		b, err := strconv.Atoi(b_string)
 		if err != nil {
 			fmt.Println(err)
 		}
-		continue
+		b_ret := descend(cur_blink+1, max_blink, b, map_in_map)
+		temp_val := a_ret + b_ret
+		_, ok := map_in_map[self]
+		if !ok {
+			map_in_map[self] = make(map[int]int)
+		}
+		map_in_map[self][cur_blink] = temp_val
+		// fmt.Println(temp_val)
+		return temp_val
+	} else {
+		temp_val := descend(cur_blink+1, max_blink, self*2024, map_in_map)
+		_, ok := map_in_map[self]
+		if !ok {
+			map_in_map[self] = make(map[int]int)
+		}
+		map_in_map[self][cur_blink] = temp_val
+		// fmt.Println(temp_val)
+		return temp_val
 	}
-	if len(string_stone)%2 == 1 {
-		stones[stone_index] = stone * 2024
-		continue
+}
+
+func getElemMapInMap(engraving, blink int, map_in_map map[int]map[int]int) int {
+	_, ok := map_in_map[engraving]
+	if ok {
+		val2, ok := map_in_map[engraving][blink]
+		if ok {
+			return val2
+		}
 	}
+	return -1
 }
 
 func getInputAsLines() ([]string, error) {
