@@ -27,7 +27,6 @@ func main() {
 
 	cur_claw_machine := ClawMachine{}
 	for _, line := range input {
-		fmt.Println("Hello")
 		if line == "" {
 			continue
 		}
@@ -57,7 +56,7 @@ func main() {
 		}
 		temp_line := strings.ReplaceAll(line, "=", " ")
 		temp_line = strings.ReplaceAll(temp_line, ",", "")
-		n, err := fmt.Scanf(temp_line, "Prize: X %d Y %d", &temp1, &temp2)
+		n, err := fmt.Sscanf(temp_line, "Prize: X %d Y %d", &temp1, &temp2)
 		if err != nil {
 			panic(err)
 		}
