@@ -7,9 +7,8 @@ import (
 )
 
 const (
-	height       = 103
-	width        = 101
-	time_elapsed = 100
+	height = 103
+	width  = 101
 )
 
 // const (
@@ -48,35 +47,67 @@ func main() {
 		robots = append(robots, robot)
 	}
 
-	var quadrants [4]int
+	for time_elapsed := 0; true; time_elapsed++ {
+		display_picture := generateBase()
+		new_robots := copyRobots(robots)
+		for _, robot := range new_robots {
+			// fmt.Println(robot)
+			total_dx := robot.Vx * time_elapsed
+			robot.Px = (((total_dx + robot.Px) % width) + width) % width
+			total_dy := robot.Vy * time_elapsed
+			robot.Py = (((total_dy + robot.Py) % height) + height) % height
+			display_picture[robot.Py][robot.Px] = 'X'
+		}
 
+		fmt.Println("Time Passe: ", time_elapsed)
+		for _, line := range display_picture {
+			fmt.Println(string(line))
+		}
+		if isPotentialTree(display_picture) {
+			fmt.Scanln()
+		}
+		fmt.Println()
+	}
+}
+
+func copyRobots(robots []Robot) []Robot {
+	var new_robots []Robot
 	for _, robot := range robots {
-		fmt.Println(robot)
-		total_dx := robot.Vx * time_elapsed
-		robot.Px = (((total_dx + robot.Px) % width) + width) % width
-		total_dy := robot.Vy * time_elapsed
-		robot.Py = (((total_dy + robot.Py) % height) + height) % height
-		if robot.Px < width/2 {
-			if robot.Py < height/2 {
-				fmt.Println("q1")
-				quadrants[0]++
-			} else if robot.Py > height/2 {
-				fmt.Println("q2")
-				quadrants[1]++
-			}
-		} else if robot.Px > width/2 {
-			if robot.Py < height/2 {
-				fmt.Println("q3")
-				quadrants[2]++
-			} else if robot.Py > height/2 {
-				fmt.Println("q4")
-				quadrants[3]++
+		new_robot := robot
+		new_robots = append(new_robots, new_robot)
+	}
+	return new_robots
+}
+
+func isPotentialTree(image [][]rune) bool {
+	max_concurrency := 0
+	for _, line := range image {
+		length_of_concurrency := 0
+		for _, cur_rune := range line {
+			if cur_rune == 'X' {
+				length_of_concurrency++
+				if length_of_concurrency == 10 {
+					return true
+				}
+			} else {
+				max_concurrency = max(length_of_concurrency, max_concurrency)
+				length_of_concurrency = 0
 			}
 		}
 	}
+	fmt.Println(max_concurrency)
+	return false
+}
 
-	fmt.Println(quadrants)
-	fmt.Println("Final: ", quadrants[0]*quadrants[1]*quadrants[2]*quadrants[3])
+func generateBase() [][]rune {
+	ret := make([][]rune, height)
+	for ri := range height {
+		ret[ri] = make([]rune, width)
+		for ci := range width {
+			ret[ri][ci] = ' '
+		}
+	}
+	return ret
 }
 
 func getInputAsLines() ([]string, error) {
