@@ -61,8 +61,8 @@ func main() {
 			panic(err)
 		}
 		if n == 2 {
-			cur_claw_machine.Px = temp1
-			cur_claw_machine.Py = temp2
+			cur_claw_machine.Px = temp1 + 10000000000000
+			cur_claw_machine.Py = temp2 + 10000000000000
 			claw_machines = append(claw_machines, cur_claw_machine)
 			cur_claw_machine = ClawMachine{}
 		}
