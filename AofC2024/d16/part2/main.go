@@ -35,7 +35,7 @@ type Person struct {
 type QueueItem struct {
 	Person Person
 	Cost   int
-	Path   []Spot
+	Path   []Person
 }
 
 func main() {
@@ -67,14 +67,18 @@ func main() {
 
 	final_cost := 0
 
-	var best_paths_spots []Spot
+	prev_cost := 0
 
-	var visited []Person
+	var best_paths_spots []Person
 
 	for len(queue) > 0 {
 		var item QueueItem
 
 		item, queue = queue[0], queue[1:]
+		if item.Cost > prev_cost {
+			fmt.Println(item.Cost)
+			prev_cost = item.Cost
+		}
 		if item.Person.Pr == end.Pr && item.Person.Pc == end.Pc {
 			final_cost = item.Cost
 			best_paths_spots = addUniquePathToSpots(best_paths_spots, item.Path)
@@ -83,14 +87,11 @@ func main() {
 		if item.Cost > final_cost && final_cost > 0 {
 			break
 		}
-		if isPersonInVisited(visited, item.Person) && item.Cost != final_cost {
-			fmt.Println("Person Visited")
-			continue
+		if !isPersonInVisited(item.Path, item.Person) {
+			item.Path = append(item.Path, item.Person)
 		} else {
-			fmt.Println("Person not visited")
-			visited = append(visited, item.Person)
+			continue
 		}
-		item.Path = append(item.Path, Spot{Pr: item.Person.Pr, Pc: item.Person.Pc})
 
 		switch item.Person.Direction {
 		case up:
@@ -98,10 +99,10 @@ func main() {
 				temp_person := item.Person
 				temp_person.Pr--
 				temp_queue_item := QueueItem{Person: temp_person, Cost: item.Cost + 1}
-				fmt.Println("temp path", temp_queue_item.Path)
-				fmt.Println(item.Path)
+				// fmt.Println("temp path", temp_queue_item.Path)
+				// fmt.Println(item.Path)
 				temp_queue_item.Path = copyPath(temp_queue_item.Path, item.Path)
-				fmt.Println("temp path2", temp_queue_item.Path)
+				// fmt.Println("temp path2", temp_queue_item.Path)
 				queue = append(queue, temp_queue_item)
 				sort.Slice(queue[:], func(i, j int) bool {
 					return queue[i].Cost < queue[j].Cost
@@ -168,19 +169,19 @@ func main() {
 	fmt.Println("Final: ", len(best_paths_spots))
 }
 
-func copyPath(dst []Spot, src []Spot) []Spot {
+func copyPath(dst []Person, src []Person) []Person {
 	for _, spot := range src {
 		dst = append(dst, spot)
 	}
 	return dst
 }
 
-func addUniquePathToSpots(best_paths_spots []Spot, new_path []Spot) []Spot {
+func addUniquePathToSpots(best_paths_spots []Person, new_path []Person) []Person {
 	for _, new_spot := range new_path {
-		fmt.Println(new_spot)
+		// fmt.Println(new_spot)
 		is_new := true
 		for _, old_spot := range best_paths_spots {
-			fmt.Println(old_spot)
+			// fmt.Println(old_spot)
 			if old_spot.Pr == new_spot.Pr && old_spot.Pc == new_spot.Pc {
 				is_new = false
 			}
@@ -218,8 +219,8 @@ func printGrid(input [][]rune, p Person) {
 
 func getInputAsLines() ([][]rune, error) {
 	// Read in files
-	// f, err := os.Open("test2.txt")
-	f, err := os.Open("test.txt")
+	f, err := os.Open("test2.txt")
+	// f, err := os.Open("test.txt")
 	// f, err := os.Open("input.txt")
 	if err != nil {
 		fmt.Println(err)
