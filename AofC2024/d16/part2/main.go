@@ -75,7 +75,15 @@ func main() {
 		var item QueueItem
 
 		item, queue = queue[0], queue[1:]
-		if isPersonInVisited(visited, item.Person) {
+		if item.Person.Pr == end.Pr && item.Person.Pc == end.Pc {
+			final_cost = item.Cost
+			best_paths_spots = addUniquePathToSpots(best_paths_spots, item.Path)
+		}
+
+		if item.Cost > final_cost && final_cost > 0 {
+			break
+		}
+		if isPersonInVisited(visited, item.Person) && item.Cost != final_cost {
 			fmt.Println("Person Visited")
 			continue
 		} else {
@@ -83,16 +91,6 @@ func main() {
 			visited = append(visited, item.Person)
 		}
 		item.Path = append(item.Path, Spot{Pr: item.Person.Pr, Pc: item.Person.Pc})
-		fmt.Println("hello", item.Path)
-		fmt.Println("Popped: ", item.Person, item.Cost)
-		if item.Person.Pr == end.Pr && item.Person.Pc == end.Pc {
-			final_cost = item.Cost
-			addUniquePathToSpots(best_paths_spots, item.Path)
-		}
-
-		if item.Cost > final_cost && final_cost > 0 {
-			break
-		}
 
 		switch item.Person.Direction {
 		case up:
@@ -100,7 +98,10 @@ func main() {
 				temp_person := item.Person
 				temp_person.Pr--
 				temp_queue_item := QueueItem{Person: temp_person, Cost: item.Cost + 1}
-				copy(temp_queue_item.Path, item.Path)
+				fmt.Println("temp path", temp_queue_item.Path)
+				fmt.Println(item.Path)
+				temp_queue_item.Path = copyPath(temp_queue_item.Path, item.Path)
+				fmt.Println("temp path2", temp_queue_item.Path)
 				queue = append(queue, temp_queue_item)
 				sort.Slice(queue[:], func(i, j int) bool {
 					return queue[i].Cost < queue[j].Cost
@@ -111,7 +112,7 @@ func main() {
 				temp_person := item.Person
 				temp_person.Pc++
 				temp_queue_item := QueueItem{Person: temp_person, Cost: item.Cost + 1}
-				copy(temp_queue_item.Path, item.Path)
+				temp_queue_item.Path = copyPath(temp_queue_item.Path, item.Path)
 				queue = append(queue, temp_queue_item)
 				sort.Slice(queue[:], func(i, j int) bool {
 					return queue[i].Cost < queue[j].Cost
@@ -122,7 +123,7 @@ func main() {
 				temp_person := item.Person
 				temp_person.Pr++
 				temp_queue_item := QueueItem{Person: temp_person, Cost: item.Cost + 1}
-				copy(temp_queue_item.Path, item.Path)
+				temp_queue_item.Path = copyPath(temp_queue_item.Path, item.Path)
 				queue = append(queue, temp_queue_item)
 				sort.Slice(queue[:], func(i, j int) bool {
 					return queue[i].Cost < queue[j].Cost
@@ -133,7 +134,7 @@ func main() {
 				temp_person := item.Person
 				temp_person.Pc--
 				temp_queue_item := QueueItem{Person: temp_person, Cost: item.Cost + 1}
-				copy(temp_queue_item.Path, item.Path)
+				temp_queue_item.Path = copyPath(temp_queue_item.Path, item.Path)
 				queue = append(queue, temp_queue_item)
 				sort.Slice(queue[:], func(i, j int) bool {
 					return queue[i].Cost < queue[j].Cost
@@ -147,7 +148,7 @@ func main() {
 			temp_person.Direction = left
 		}
 		temp_queue_item := QueueItem{Person: temp_person, Cost: item.Cost + 1000}
-		copy(temp_queue_item.Path, item.Path)
+		temp_queue_item.Path = copyPath(temp_queue_item.Path, item.Path)
 		queue = append(queue, temp_queue_item)
 		temp_person = item.Person
 		if temp_person.Direction < left {
@@ -156,7 +157,7 @@ func main() {
 			temp_person.Direction = up
 		}
 		temp_queue_item = QueueItem{Person: temp_person, Cost: item.Cost + 1000}
-		copy(temp_queue_item.Path, item.Path)
+		temp_queue_item.Path = copyPath(temp_queue_item.Path, item.Path)
 		queue = append(queue, temp_queue_item)
 		sort.Slice(queue[:], func(i, j int) bool {
 			return queue[i].Cost < queue[j].Cost
@@ -167,7 +168,14 @@ func main() {
 	fmt.Println("Final: ", len(best_paths_spots))
 }
 
-func addUniquePathToSpots(best_paths_spots []Spot, new_path []Spot) {
+func copyPath(dst []Spot, src []Spot) []Spot {
+	for _, spot := range src {
+		dst = append(dst, spot)
+	}
+	return dst
+}
+
+func addUniquePathToSpots(best_paths_spots []Spot, new_path []Spot) []Spot {
 	for _, new_spot := range new_path {
 		fmt.Println(new_spot)
 		is_new := true
@@ -181,6 +189,7 @@ func addUniquePathToSpots(best_paths_spots []Spot, new_path []Spot) {
 			best_paths_spots = append(best_paths_spots, new_spot)
 		}
 	}
+	return best_paths_spots
 }
 
 func isPersonInVisited(visited []Person, p Person) bool {
