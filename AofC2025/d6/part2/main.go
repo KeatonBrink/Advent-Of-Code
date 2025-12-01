@@ -7,7 +7,12 @@ import (
 )
 
 func main() {
-	input, err := getInputAsLines()
+	file_name := "input.txt"
+	args := os.Args[1:]
+	if len(args) >= 1 {
+		file_name = args[0]
+	}
+	input, err := getInputAsLines(file_name)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -15,9 +20,9 @@ func main() {
 	fmt.Println(input)
 }
 
-func getInputAsLines() ([]string, error) {
+func getInputAsLines(file_name string) ([]string, error) {
 	// Read in files
-	f, err := os.Open("input.txt")
+	f, err := os.Open(file_name)
 	if err != nil {
 		fmt.Println(err)
 		return nil, err
