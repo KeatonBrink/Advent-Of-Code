@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 )
 
 func main() {
@@ -17,7 +18,30 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(input)
+	dial := 50
+	zeros := 0
+	const MaxDial int = 100
+	for _, value := range input {
+		fmt.Println("Value:", value, "Dial:", dial)
+		direction := value[0]
+		clicks, err := strconv.Atoi(value[1:])
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		if direction == 'L' {
+			clicks = clicks * -1
+		}
+		dial = (dial + clicks) % MaxDial
+		if dial < 0 {
+			dial = MaxDial + dial
+		}
+		fmt.Println("New Dial", dial)
+		if dial == 0 {
+			zeros = zeros + 1
+		}
+	}
+	fmt.Println("Zeros:", zeros)
 }
 
 func getInputAsLines(file_name string) ([]string, error) {
