@@ -19,7 +19,7 @@ func main() {
 		return
 	}
 	total := 0
-	// Find the two largest numbers
+
 	for _, line := range input {
 		largest, largest_ind := '0', -1
 		for ind, char := range line {
