@@ -17,7 +17,45 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(input)
+	total_splits := 0
+	// Location of active lasers
+	var cur_lasers []int
+	for _, line := range input {
+		var next_lasers []int
+		if len(cur_lasers) == 0 {
+			for ind, char := range line {
+				if char == 'S' {
+					next_lasers = []int{ind}
+					break
+				}
+			}
+		} else {
+			for _, ind := range cur_lasers {
+				if line[ind] == '^' {
+					total_splits += 1
+					if ind > 0 && !isPositionInSlice(ind-1, next_lasers) {
+						next_lasers = append(next_lasers, ind-1)
+					}
+					if ind < len(line)-1 && !isPositionInSlice(ind+1, next_lasers) {
+						next_lasers = append(next_lasers, ind+1)
+					}
+				} else if line[ind] == '.' && !isPositionInSlice(ind, next_lasers) {
+					next_lasers = append(next_lasers, ind)
+				}
+			}
+		}
+		cur_lasers = next_lasers
+	}
+	fmt.Println(total_splits)
+}
+
+func isPositionInSlice(target_ind int, cur_slice []int) bool {
+	for _, cur_ind := range cur_slice {
+		if cur_ind == target_ind {
+			return true
+		}
+	}
+	return false
 }
 
 func getInputAsLines(file_name string) ([]string, error) {
