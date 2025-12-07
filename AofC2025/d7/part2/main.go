@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type Laser struct {
@@ -22,43 +23,73 @@ func main() {
 		fmt.Println(err)
 		return
 	}
-	total_splits := 1
-	// Location of active lasers
-	var cur_lasers []int
-	for line_num, line := range input {
-		fmt.Println(line_num, len(cur_lasers))
-		var next_lasers []int
+	// Location of active lasers and the total for the given spot
+	var cur_lasers []Laser
+	for _, line := range input {
+		var next_lasers []Laser
 		if len(cur_lasers) == 0 {
 			for ind, char := range line {
 				if char == 'S' {
-					next_lasers = []int{ind}
+					next_lasers = []Laser{{ind, 1}}
 					break
 				}
 			}
 		} else {
-			for _, ind := range cur_lasers {
-				// fmt.Println(cur_lasers)
-				if line[ind] == '^' {
-					total_splits += 1
-					if ind > 0 {
-						next_lasers = append(next_lasers, ind-1)
+			if !strings.ContainsRune(line, '^') {
+				continue
+			}
+			// printLaserTotal(cur_lasers)
+			for _, laser := range cur_lasers {
+				if line[laser.Location] == '^' {
+					if laser.Location > 0 {
+						if !isLaserInSlice(Laser{laser.Location - 1, laser.Total}, next_lasers) {
+							next_lasers = append(next_lasers, Laser{laser.Location - 1, laser.Total})
+						} else {
+							next_lasers = incrementTotalInSlice(Laser{laser.Location - 1, laser.Total}, next_lasers)
+						}
 					}
-					if ind < len(line)-1 {
-						next_lasers = append(next_lasers, ind+1)
+					if laser.Location < len(line)-1 {
+						if !isLaserInSlice(Laser{laser.Location + 1, laser.Total}, next_lasers) {
+							next_lasers = append(next_lasers, Laser{laser.Location + 1, laser.Total})
+						} else {
+							next_lasers = incrementTotalInSlice(Laser{laser.Location + 1, laser.Total}, next_lasers)
+						}
 					}
-				} else if line[ind] == '.' {
-					next_lasers = append(next_lasers, ind)
+				} else if line[laser.Location] == '.' {
+					if !isLaserInSlice(Laser{laser.Location, laser.Total}, next_lasers) {
+						next_lasers = append(next_lasers, Laser{laser.Location, laser.Total})
+					} else {
+						next_lasers = incrementTotalInSlice(Laser{laser.Location, laser.Total}, next_lasers)
+					}
 				}
 			}
 		}
 		cur_lasers = next_lasers
 	}
-	fmt.Println(total_splits)
+	printLaserTotal(cur_lasers)
 }
 
-func isPositionInSlice(target_ind int, cur_slice []int) bool {
-	for _, cur_ind := range cur_slice {
-		if cur_ind == target_ind {
+func printLaserTotal(cur_lasers []Laser) {
+	temp_total := 0
+	for _, cur_laser := range cur_lasers {
+		temp_total += cur_laser.Total
+	}
+	fmt.Println(temp_total)
+}
+
+func incrementTotalInSlice(target_laser Laser, cur_slice []Laser) []Laser {
+	for ind, cur_laser := range cur_slice {
+		if cur_laser.Location == target_laser.Location {
+			cur_slice[ind].Total += target_laser.Total
+			break
+		}
+	}
+	return cur_slice
+}
+
+func isLaserInSlice(target_laser Laser, cur_slice []Laser) bool {
+	for _, cur_laser := range cur_slice {
+		if cur_laser.Location == target_laser.Location {
 			return true
 		}
 	}
