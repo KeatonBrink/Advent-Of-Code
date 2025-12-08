@@ -89,20 +89,17 @@ func main() {
 		for ind2 := ind1 + 1; ind2 < len(junction_boxes); ind2++ {
 			// fmt.Println(ind1, ind2)
 			jbc := JunctionBoxConnection{&junction_boxes[ind1], &junction_boxes[ind2]}
-			jbc_dist := jbc.Distance()
-
-			// Using Golang efficient search
-			idx := sort.Search(len(junction_pairs), func(i int) bool {
-				return junction_pairs[i].Distance() >= jbc_dist
-			})
-			junction_pairs = append(junction_pairs[:idx], append([]JunctionBoxConnection{jbc}, junction_pairs[idx:]...)...)
+			junction_pairs = append(junction_pairs, jbc)
 		}
-
 	}
+	sort.Slice(junction_pairs, func(i, j int) bool {
+		return junction_pairs[i].Distance() < junction_pairs[j].Distance()
+	})
 	fmt.Println("Junction Box Connections completed")
 	pairs := 0
 	total_junctions := len(input)
 	var circuits [][]*JunctionBox
+	start_time = time.Now()
 	for _, jbc := range junction_pairs {
 		// fmt.Println(jbc.a, jbc.b)
 		// if pairs == max_pairs {
@@ -144,6 +141,7 @@ func main() {
 		}
 		pairs++
 	}
+	fmt.Println("Finished Circuits in: ", time.Since(start_time))
 	fmt.Println("Circuits Created")
 }
 
