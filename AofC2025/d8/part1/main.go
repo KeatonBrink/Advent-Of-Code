@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -87,27 +88,12 @@ func main() {
 		for ind2 := ind1 + 1; ind2 < len(junction_boxes); ind2++ {
 			// fmt.Println(ind1, ind2)
 			jbc := JunctionBoxConnection{&junction_boxes[ind1], &junction_boxes[ind2]}
-			jbc_dist := jbc.Distance()
-			// fmt.Println(jbc_dist)
-			smallest_found := false
-			for ind_conn, curr_jbc := range junction_pairs {
-				// Trying to speed up the process by ignoring pairs that fall out the possible usefulness
-				if ind_conn > max_pairs {
-					smallest_found = true
-					break
-				}
-				if jbc_dist < curr_jbc.Distance() {
-					junction_pairs = append(junction_pairs[:ind_conn], append([]JunctionBoxConnection{jbc}, junction_pairs[ind_conn:]...)...)
-					smallest_found = true
-					break
-				}
-			}
-			if !smallest_found {
-				junction_pairs = append(junction_pairs, jbc)
-			}
+			junction_pairs = append(junction_pairs, jbc)
 		}
-
 	}
+	sort.Slice(junction_pairs, func(i, j int) bool {
+		return junction_pairs[i].Distance() < junction_pairs[j].Distance()
+	})
 	fmt.Println("Junction Box Connections completed")
 	pairs := 0
 	var circuits [][]*JunctionBox
