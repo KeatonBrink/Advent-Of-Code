@@ -157,56 +157,27 @@ func main() {
 			tc1 := tile_corners[tile_corner1_ind]
 			tc2 := tile_corners[tile_corner2_ind]
 			cur_area := tc1.GetArea(tc2)
-			if cur_area <= largest_area {
+			// Optimizing by removing 90% of cases.
+			// Is more efficent when the largest area is found first
+			// Checks the corners of grid
+			if cur_area <= largest_area || (grid[min(tc1.row, tc2.row)][min(tc1.col, tc2.col)] == '.') || (grid[min(tc1.row, tc2.row)][max(tc1.col, tc2.col)] == '.') || (grid[max(tc1.row, tc2.row)][min(tc1.col, tc2.col)] == '.') || (grid[max(tc1.row, tc2.row)][max(tc1.col, tc2.col)] == '.') {
 				continue
 			}
 			is_valid := true
-			col1 := min(tc1.col, tc2.col)
-			col2 := max(tc1.col, tc2.col)
+			// Computationally expensive, and should be avoided where possible
 			for temp_row := min(tc1.row, tc2.row); temp_row <= max(tc1.row, tc2.row) && is_valid; temp_row++ {
-				if grid[temp_row][col1] == '.' || grid[temp_row][col2] == '.' {
-					is_valid = false
-				}
-			}
-			row1 := min(tc1.row, tc2.row)
-			row2 := max(tc1.row, tc2.row)
-			for temp_col := min(tc1.col, tc2.col); temp_col <= max(tc1.col, tc2.col) && is_valid; temp_col++ {
-				if grid[row1][temp_col] == '.' || grid[row2][temp_col] == '.' {
-					is_valid = false
+				for temp_col := min(tc1.col, tc2.col); temp_col <= max(tc1.col, tc2.col) && is_valid; temp_col++ {
+					if grid[temp_row][temp_col] == '.' {
+						is_valid = false
+					}
 				}
 			}
 			if is_valid {
-				fmt.Println("Largest Area so far", largest_area)
 				largest_area = cur_area
+				fmt.Println("Largest Area so far", largest_area)
 			}
 		}
 	}
-	// for tile_corner1_ind := 0; tile_corner1_ind < len(tile_corners)-1; tile_corner1_ind++ {
-	// 	for tile_corner2_ind := tile_corner1_ind + 1; tile_corner2_ind < len(tile_corners); tile_corner2_ind++ {
-	// 		tc1 := tile_corners[tile_corner1_ind]
-	// 		tc2 := tile_corners[tile_corner2_ind]
-	// 		found_other_red_tile := false
-	// 		for temp_row := min(tc1.row, tc2.row) + 1; temp_row < max(tc1.row, tc2.row) && !found_other_red_tile; temp_row++ {
-	// 			for temp_col := min(tc1.col, tc2.col) + 1; temp_col < max(tc1.col, tc2.col) && !found_other_red_tile; temp_col++ {
-	// 				for _, temp_tc := range tile_corners {
-	// 					if temp_tc.row == temp_row && temp_tc.col == temp_col {
-	// 						found_other_red_tile = true
-	// 						break
-	// 					}
-	// 				}
-	// 			}
-	// 		}
-	// 		// Use eventually
-	// 		if !found_other_red_tile {
-
-	// 			cur_area := tc1.GetArea(tc2)
-	// 			fmt.Println("No other tile found:", tc1.row, tc1.col, tc2.row, tc2.col, "Cur Area", cur_area)
-	// 			if cur_area > largest_area {
-	// 				largest_area = cur_area
-	// 			}
-	// 		}
-	// 	}
-	// }
 	fmt.Println(largest_area)
 }
 
